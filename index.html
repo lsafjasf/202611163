@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07141d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230b2029'/%3E%3Cpath d='M7 21h18M7 16h18M7 11h11' stroke='%234fe3c1' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <title>货流罗盘 · 物流流量沙盘</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div>
+          <div class="brand-title">货流罗盘 <span>Cargo Flow</span></div>
+          <div class="brand-subtitle">工厂 → 仓储 → 门店 · 库存与容量推演</div>
+        </div>
+      </div>
+
+      <div class="dataset-switch" id="datasetSwitch" role="tablist" aria-label="数据样例">
+        <button class="dataset-tab" data-dataset="normal" role="tab">正常</button>
+        <button class="dataset-tab" data-dataset="missing" role="tab">缺失</button>
+        <button class="dataset-tab" data-dataset="duplicate" role="tab">重复</button>
+      </div>
+
+      <div class="header-meta">
+        <div class="version-block">
+          <span class="eyebrow">数据版本</span>
+          <strong id="versionText">—</strong>
+          <span id="updatedText">—</span>
+        </div>
+        <div class="quality-mini" id="qualityMini">
+          <span class="quality-ring" id="qualityRing"><b>—</b></span>
+          <span><small>数据可用率</small><strong id="qualityScoreText">—</strong></span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="filter-strip panel">
+        <div class="filter-group">
+          <span class="filter-label">时间窗口</span>
+          <div class="segmented" id="windowSwitch" aria-label="时间窗口">
+            <button data-window="7d">近 7 天</button>
+            <button data-window="14d">近 14 天</button>
+            <button data-window="30d">近 30 天</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">区域</span>
+          <div class="segmented" id="regionSwitch" aria-label="区域筛选">
+            <button data-region="全部">全部</button>
+            <button data-region="华东">华东</button>
+            <button data-region="华南">华南</button>
+          </div>
+        </div>
+        <div class="scope-summary">
+          <span class="scope-dot"></span>
+          <div>
+            <span class="eyebrow">当前筛选</span>
+            <div id="filterSummary">—</div>
+          </div>
+        </div>
+        <button class="ghost-button reset-button" id="resetButton" title="恢复默认筛选与容量">重置沙盘</button>
+      </section>
+
+      <section class="kpi-grid" aria-label="关键指标">
+        <article class="kpi-card">
+          <div class="kpi-icon cyan">供</div>
+          <span class="kpi-label">工厂可供量</span>
+          <strong class="kpi-value" id="kpiSupply">—</strong>
+          <span class="kpi-note">当前筛选内有效单据合计</span>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-icon blue">需</div>
+          <span class="kpi-label">门店需求量</span>
+          <strong class="kpi-value" id="kpiDemand">—</strong>
+          <span class="kpi-note">与可供量同源，按路径聚合</span>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-icon teal">达</div>
+          <span class="kpi-label">已配送量</span>
+          <strong class="kpi-value" id="kpiDelivered">—</strong>
+          <span class="kpi-note" id="kpiDeliveredNote">—</span>
+        </article>
+        <article class="kpi-card alert-card">
+          <div class="kpi-icon red">缺</div>
+          <span class="kpi-label">门店缺口</span>
+          <strong class="kpi-value red" id="kpiGap">—</strong>
+          <span class="kpi-note" id="kpiGapNote">—</span>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-icon amber">载</div>
+          <span class="kpi-label">超载线路</span>
+          <strong class="kpi-value amber" id="kpiOverload">—</strong>
+          <span class="kpi-note">计划负载高于当前容量</span>
+        </article>
+      </section>
+
+      <section class="main-grid">
+        <section class="panel map-card">
+          <div class="card-head map-head">
+            <div>
+              <span class="eyebrow">实时网络图</span>
+              <h1>货物流向与容量告警</h1>
+            </div>
+            <div class="map-actions">
+              <button class="run-button" id="runButton">
+                <span class="run-icon"></span>
+                <span id="runButtonText">运行一步</span>
+                <b id="stepCounter">0/10</b>
+              </button>
+              <button class="primary-button" id="exportButton" disabled>导出图表</button>
+            </div>
+          </div>
+
+          <div class="canvas-wrap" id="canvasWrap">
+            <canvas id="flowCanvas" aria-label="工厂、仓库与商店之间的货物流向图"></canvas>
+            <div class="canvas-hint">点击节点查看当前供需</div>
+          </div>
+
+          <div class="map-legend" aria-label="图例">
+            <span><i class="legend-line normal"></i>正常货流</span>
+            <span><i class="legend-line warning"></i>超载线路</span>
+            <span><i class="legend-node factory"></i>工厂</span>
+            <span><i class="legend-node warehouse"></i>仓库</span>
+            <span><i class="legend-node store"></i>门店</span>
+            <span class="legend-spacer"></span>
+            <span id="conservationBadge" class="conservation-badge">守恒校验中</span>
+          </div>
+
+          <div class="map-footer">
+            <div class="stats-scope">
+              <span class="eyebrow">统计口径</span>
+              <p id="statsScopeText">—</p>
+            </div>
+            <div class="run-progress">
+              <div class="progress-track"><span id="stepProgress"></span></div>
+              <span id="runHint">完成 10 步后解锁导出</span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="side-stack">
+          <section class="panel node-detail-card">
+            <div class="card-head compact">
+              <div>
+                <span class="eyebrow">节点透视</span>
+                <h2 id="detailTitle">选择一个节点</h2>
+              </div>
+              <span class="node-type-pill" id="detailPill">—</span>
+            </div>
+            <div class="detail-region"><span id="detailRegion">—</span><span id="detailStatus" class="status-chip">—</span></div>
+            <div class="detail-metrics">
+              <div><span id="detailMetric1Label">可供</span><strong id="detailMetric1">—</strong></div>
+              <div><span id="detailMetric2Label">需求</span><strong id="detailMetric2">—</strong></div>
+              <div><span id="detailMetric3Label">差额</span><strong id="detailMetric3">—</strong></div>
+            </div>
+            <div class="formula-box" id="detailFormula">点击 Canvas 中的任意节点，查看该节点的实时供需与守恒关系。</div>
+          </section>
+
+          <section class="panel route-card">
+            <div class="card-head compact">
+              <div>
+                <span class="eyebrow">参数面板</span>
+                <h2>线路容量</h2>
+              </div>
+              <button class="text-button" id="resetCapacityButton">恢复默认</button>
+            </div>
+            <p class="card-help">调整容量会即时重算最大流、缺口与超载告警。</p>
+            <div class="route-list" id="routeList"></div>
+          </section>
+        </aside>
+      </section>
+
+      <section class="lower-grid">
+        <section class="panel node-table-card">
+          <div class="card-head compact">
+            <div>
+              <span class="eyebrow">当前筛选 · 同步列表</span>
+              <h2>节点库存与缺口</h2>
+            </div>
+            <span class="row-count" id="nodeRowCount">—</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>节点</th><th>类型</th><th>可供 / 入库</th><th>需求 / 出库</th><th>余量 / 缺口</th><th>状态</th></tr>
+              </thead>
+              <tbody id="nodeTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel quality-card">
+          <div class="card-head compact">
+            <div>
+              <span class="eyebrow">数据质量摘要 · 整份数据</span>
+              <h2>清洗与校验</h2>
+            </div>
+            <button class="text-button" id="sampleButton">原始样例</button>
+          </div>
+          <div class="quality-hero">
+            <div class="quality-score" id="qualityBigScore">—</div>
+            <div>
+              <strong id="qualityHeadline">—</strong>
+              <p id="qualitySubline">—</p>
+            </div>
+          </div>
+          <div class="quality-counts">
+            <div><span>原始</span><strong id="qualityRaw">—</strong></div>
+            <div><span>去重</span><strong class="cyan-text" id="qualityDuplicates">—</strong></div>
+            <div><span>缺失</span><strong class="amber-text" id="qualityMissing">—</strong></div>
+            <div><span>异常</span><strong class="red-text" id="qualityAnomalies">—</strong></div>
+            <div><span>有效</span><strong class="green-text" id="qualityValid">—</strong></div>
+          </div>
+          <div class="validation-list" id="validationList"></div>
+          <p class="quality-note">规则：先去重；再剔除空字段、非法日期、未知节点与数量异常。质量统计不随筛选变化。</p>
+        </section>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span id="footerVersion">—</span>
+      <span>所有指标由原始样例实时重算 · 不预置结果</span>
+      <span id="footerFingerprint">—</span>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop" id="sampleModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="sampleModalTitle">
+      <div class="card-head">
+        <div>
+          <span class="eyebrow">可追溯原始样例</span>
+          <h2 id="sampleModalTitle">原始记录与清洗结果</h2>
+        </div>
+        <button class="icon-button" id="closeSampleButton" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-summary" id="sampleSummary">—</div>
+      <div class="table-wrap modal-table-wrap">
+        <table class="data-table sample-table">
+          <thead>
+            <tr><th>状态</th><th>单据</th><th>日期</th><th>工厂</th><th>仓库</th><th>门店</th><th>数量</th><th>清洗说明</th></tr>
+          </thead>
+          <tbody id="sampleTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

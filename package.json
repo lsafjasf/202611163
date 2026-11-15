@@ -1,0 +1,10 @@
+{
+  "name": "cargo-flow-compass",
+  "version": "1.0.0",
+  "private": true,
+  "description": "工厂、仓库与门店货物流量沙盘",
+  "scripts": {
+    "test": "node --test tests/data.test.js",
+    "serve": "python3 -m http.server 5500 --bind 127.0.0.1"
+  }
+}
