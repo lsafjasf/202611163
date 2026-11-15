@@ -1,0 +1,29 @@
+{
+  "name": "uid714",
+  "version": "1.0.0",
+  "description": "双人皮筏协作渡河：Canvas + Web Audio，含共享状态、控制轮换、回放与确定性自测",
+  "main": "index.html",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node tests/run-tests.js && node tests/browser-smoke.js",
+    "test:physics": "node tests/run-tests.js",
+    "test:browser": "node tests/browser-smoke.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/202611163.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/202611163/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/202611163#readme",
+  "dependencies": {
+    "jsdom": "^31.0.1"
+  }
+}

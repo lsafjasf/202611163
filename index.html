@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>双人皮筏 · 协作渡河</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <h1>双人皮筏协作渡河</h1>
+    <div class="top-actions">
+      <button id="btn-pause" class="btn">暂停 (Space)</button>
+      <button id="btn-restart" class="btn">重开 (R)</button>
+      <button id="btn-swap" class="btn">交换控制侧 (T)</button>
+      <button id="btn-debug" class="btn">单人调试 (D)</button>
+      <button id="btn-mute" class="btn">音效 (M)</button>
+      <button id="btn-selftest" class="btn">运行自测</button>
+      <button id="btn-replay" class="btn">回放</button>
+    </div>
+  </header>
+
+  <div class="hud">
+    <section class="panel" id="panel-p1">
+      <h2>玩家 1 <span class="side-tag" id="p1-side">左桨</span></h2>
+      <div class="metric"><label>桨频</label><span id="p1-rate">0.00 次/秒</span></div>
+      <div class="metric"><label>体力</label>
+        <div class="bar"><i id="p1-stamina"></i></div>
+      </div>
+      <div class="keys" id="p1-keys">W 前进划 / S 反向划</div>
+    </section>
+
+    <section class="panel panel-shared">
+      <h2>筏体共享状态</h2>
+      <div class="metric"><label>倒计时</label><span id="sh-timer">95.0 s</span></div>
+      <div class="metric"><label>船体耐久</label>
+        <div class="bar bar-hull"><i id="sh-hull"></i></div>
+      </div>
+      <div class="metric"><label>同步率</label>
+        <div class="bar bar-sync"><i id="sh-sync"></i></div>
+      </div>
+      <div class="metric"><label>航程</label><span id="sh-progress">0%</span></div>
+      <div class="metric"><label>乘客</label><span id="sh-passengers">0 / 3 已送达</span></div>
+      <div class="metric"><label>状态</label><span id="sh-status">待开始</span></div>
+    </section>
+
+    <section class="panel" id="panel-p2">
+      <h2>玩家 2 <span class="side-tag" id="p2-side">右桨</span></h2>
+      <div class="metric"><label>桨频</label><span id="p2-rate">0.00 次/秒</span></div>
+      <div class="metric"><label>体力</label>
+        <div class="bar"><i id="p2-stamina"></i></div>
+      </div>
+      <div class="keys" id="p2-keys">↑ 前进划 / ↓ 反向划</div>
+    </section>
+  </div>
+
+  <div class="stage">
+    <canvas id="game-canvas" width="900" height="600"></canvas>
+    <div class="overlay" id="overlay">
+      <div class="overlay-card" id="overlay-card">
+        <h2 id="ov-title">双人皮筏协作渡河</h2>
+        <p id="ov-body">两人各控一侧船桨，节奏一致才能直行。<br/>
+        水流会把筏子推向礁石，三名乘客全部送达对岸即胜利。</p>
+        <div class="overlay-actions" id="ov-actions"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer" id="drawer" hidden>
+    <div class="drawer-head">
+      <h2 id="drawer-title">回放与自测</h2>
+      <button class="btn" id="btn-drawer-close">关闭</button>
+    </div>
+    <div id="drawer-body"></div>
+  </div>
+
+  <footer class="hint">
+    玩家1：W/S 控制左桨 · 玩家2：方向键 ↑/↓ 控制右桨 · Space 暂停 · R 重开 · T 交换左右 ·
+    D 单人调试（一人控双侧，B 双侧同划）· F 调试叠层 · M 静音
+  </footer>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/rng.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/input.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/replay.js"></script>
+<script src="js/replay-viewer.js"></script>
+<script src="js/render.js"></script>
+<script src="js/selftest.js"></script>
+<script src="js/selftest-ui.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
