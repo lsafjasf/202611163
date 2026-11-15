@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>双人协作 · 长货叉车</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #14181f; color: #dfe6ef; font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; }
+  h1 { font-size: 18px; margin-bottom: 8px; }
+  #layout { display: flex; gap: 10px; }
+  .hud { width: 190px; background: #1d232e; border: 1px solid #2c3542; border-radius: 8px; padding: 10px; font-size: 13px; }
+  .hud h2 { font-size: 14px; margin-bottom: 6px; color: #8fd0ff; }
+  .hud .row { display: flex; justify-content: space-between; margin: 4px 0; }
+  .hud .warn { color: #ff7b7b; font-weight: bold; }
+  .hud .ok { color: #7bff9e; }
+  .bar { height: 8px; background: #2c3542; border-radius: 4px; overflow: hidden; margin: 2px 0 6px; }
+  .bar > div { height: 100%; background: #8fd0ff; transition: width .1s; }
+  #center { display: flex; flex-direction: column; gap: 8px; }
+  canvas { background: #20262f; border: 1px solid #2c3542; border-radius: 8px; }
+  #shared { display: flex; gap: 16px; background: #1d232e; border: 1px solid #2c3542; border-radius: 8px; padding: 8px 14px; font-size: 14px; }
+  #banner { min-height: 26px; font-size: 18px; font-weight: bold; text-align: center; }
+  #controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  button { background: #2c3542; color: #dfe6ef; border: 1px solid #3d4a5c; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+  button:hover { background: #3d4a5c; }
+  button.active { background: #2f6db3; border-color: #4f8dd3; }
+  #replayPanel { width: 960px; background: #1d232e; border: 1px solid #2c3542; border-radius: 8px; padding: 8px 14px; font-size: 13px; }
+  #timeline { width: 100%; }
+  #replayEvents { max-height: 90px; overflow-y: auto; margin-top: 6px; font-size: 12px; color: #a9b6c6; }
+  #replayEvents .conflict { color: #ffb27b; }
+  .keys { color: #8a96a6; font-size: 12px; margin-top: 6px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<h1>双人协作 · 长货叉车（完成 3 次装卸即成功）</h1>
+<div id="layout">
+  <div class="hud" id="hudDriver">
+    <h2>驾驶员仪表 <span id="driverSide"></span></h2>
+    <div class="row"><span>速度</span><span id="dSpeed">0</span></div>
+    <div class="bar"><div id="dSpeedBar"></div></div>
+    <div class="row"><span>转向角</span><span id="dSteer">0</span></div>
+    <div class="row"><span>后轮状态</span><span id="dWheels" class="ok">着地</span></div>
+    <div class="row"><span>碰撞</span><span id="dCollision">无</span></div>
+    <div class="keys" id="driverKeys"></div>
+  </div>
+  <div id="center">
+    <canvas id="game" width="960" height="640"></canvas>
+    <div id="shared">
+      <span>已交付 <b id="sDelivered">0</b>/3</span>
+      <span>库存 <b id="sStock">3</b></span>
+      <span>损失 <b id="sLost">0</b></span>
+      <span>地面散箱 <b id="sGround">0</b></span>
+      <span>倒计时 <b id="sTime">240.0</b>s</span>
+      <span>重心 <b id="sCg">0.00</b></span>
+    </div>
+    <div id="banner"></div>
+    <div id="controls">
+      <button id="btnPause">暂停 (P)</button>
+      <button id="btnRestart">重开 (R)</button>
+      <button id="btnDebug">单人调试 (T)</button>
+      <button id="btnSwap">轮换控制侧 (Tab)</button>
+      <button id="btnReplay">查看回放</button>
+    </div>
+  </div>
+  <div class="hud" id="hudOperator">
+    <h2>操作员仪表 <span id="opSide"></span></h2>
+    <div class="row"><span>货叉高度</span><span id="oFork">0%</span></div>
+    <div class="bar"><div id="oForkBar"></div></div>
+    <div class="row"><span>倾斜</span><span id="oTilt">0</span></div>
+    <div class="row"><span>负载</span><span id="oLoad">空</span></div>
+    <div class="row"><span>箱完好度</span><span id="oIntegrity">-</span></div>
+    <div class="keys" id="opKeys"></div>
+  </div>
+</div>
+<div id="replayPanel" style="display:none">
+  <div>回放（冲突时刻以 ● 标出，拖动进度条查看）</div>
+  <input type="range" id="timeline" min="0" max="0" value="0">
+  <div id="replayInfo">-</div>
+  <div id="replayEvents"></div>
+</div>
+<script src="game.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
