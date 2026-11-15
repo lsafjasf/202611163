@@ -1,0 +1,27 @@
+{
+  "name": "uid745",
+  "version": "1.0.0",
+  "description": "双卷扬机吊装确定性物理仿真（Canvas + WebAudio）",
+  "main": "js/physics.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node tests/run-tests.js",
+    "test:ui": "node tests/ui-smoke.js",
+    "test:render": "node tests/render-smoke.js",
+    "test:all": "node tests/run-tests.js && node tests/render-smoke.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/202611163.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/202611163/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/202611163#readme"
+}
