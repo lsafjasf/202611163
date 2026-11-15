@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#153b32" />
+    <title>Crease Studio — Carton Dieline Editor</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23153b32'/%3E%3Cpath d='M14 31 32 20l18 11M14 31v15l18 10V31m18 0v15L32 56M32 20v11' fill='none' stroke='%23f4c95d' stroke-width='3'/%3E%3Cpath d='m23 27 9-5 9 5' fill='none' stroke='%23e4572e' stroke-width='3'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </span>
+          <span class="brand-name">CREASE<strong>STUDIO</strong></span>
+        </div>
+        <label class="document-title">
+          <span>ACTIVE FILE</span>
+          <input id="docTitle" value="Aurora mailer / 01" aria-label="Project title" />
+        </label>
+        <div class="history-tools" aria-label="History">
+          <button class="icon-btn" id="undoBtn" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+          <button class="icon-btn" id="redoBtn" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↷</button>
+        </div>
+        <div class="topbar-spacer"></div>
+        <div class="saved-state" id="saveState">
+          <span class="state-dot"></span>
+          <span id="saveStateText">Autosaved locally</span>
+        </div>
+        <button class="top-btn" id="saveBtn" title="Save project (Ctrl+S)">Save</button>
+        <button class="top-btn" id="reloadBtn" title="Reload last saved project">Reload</button>
+        <div class="export-wrap">
+          <button class="top-btn top-btn-primary" id="exportButton" aria-haspopup="menu">
+            Export <span class="export-arrow">⌄</span>
+          </button>
+          <div class="export-menu" id="exportMenu" role="menu" hidden>
+            <button id="exportSvgBtn" role="menuitem">
+              <span class="format-icon">SV</span>
+              <span><strong>Editable SVG</strong><small>native text, shapes & metadata</small></span>
+            </button>
+            <button id="exportPngBtn" role="menuitem">
+              <span class="format-icon">PN</span>
+              <span><strong>High-res PNG</strong><small>2× rendered production preview</small></span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="side-panel left-panel">
+          <section class="panel-section template-section">
+            <div class="section-heading">
+              <span class="section-index">01</span>
+              <div><h2>Templates</h2><p>Proven carton profiles</p></div>
+            </div>
+            <div class="template-stack">
+              <button class="template-card is-active" data-template="default">
+                <span class="template-swatch default-swatch"><i></i><i></i><i></i></span>
+                <span><strong>Retail mailer</strong><small>320 × 220 × 140 mm</small></span>
+                <span class="template-check">✓</span>
+              </button>
+              <button class="template-card" data-template="boundary">
+                <span class="template-swatch edge-swatch"><i></i><i></i><i></i></span>
+                <span><strong>Boundary test</strong><small>46 × 34 × 24 mm</small></span>
+                <span class="template-check">↗</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <span class="section-index">02</span>
+              <div><h2>Box dimensions</h2><p>All faces update together</p></div>
+            </div>
+            <div class="dimension-grid">
+              <label class="dimension-field">
+                <span><b>L</b> Length</span>
+                <span class="input-unit"><input id="lengthInput" type="number" min="20" max="900" step="1" value="320" /><em>mm</em></span>
+              </label>
+              <label class="dimension-field">
+                <span><b>W</b> Width</span>
+                <span class="input-unit"><input id="widthInput" type="number" min="20" max="700" step="1" value="220" /><em>mm</em></span>
+              </label>
+              <label class="dimension-field">
+                <span><b>H</b> Height</span>
+                <span class="input-unit"><input id="heightInput" type="number" min="20" max="600" step="1" value="140" /><em>mm</em></span>
+              </label>
+            </div>
+            <div class="box-sketch" aria-hidden="true">
+              <span class="sketch-l">L</span><span class="sketch-w">W</span><span class="sketch-h">H</span>
+              <div class="sketch-cube"><i></i></div>
+              <div class="closure-readout"><span class="closure-dot"></span><span id="closureText">4-panel closure verified</span></div>
+            </div>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading compact">
+              <span class="section-index">03</span>
+              <div><h2>Structure</h2></div>
+            </div>
+            <label class="range-row">
+              <span>Glue tongue <output id="glueValue">22 mm</output></span>
+              <input id="glueRange" type="range" min="8" max="60" value="22" />
+            </label>
+            <label class="range-row">
+              <span>Fold line <output id="foldValue">0.35 mm</output></span>
+              <input id="foldRange" type="range" min="0.15" max="1.2" step="0.05" value="0.35" />
+            </label>
+            <label class="range-row">
+              <span>Safe margin <output id="safeValue">7 mm</output></span>
+              <input id="safeRange" type="range" min="2" max="24" value="7" />
+            </label>
+            <div class="segmented-label"><span>Fold style</span></div>
+            <div class="segmented-control" id="foldStyleControl">
+              <button class="is-active" data-style="dash"><i class="dash-sample"></i>Dash</button>
+              <button data-style="solid"><i class="solid-sample"></i>Solid</button>
+            </div>
+          </section>
+
+          <section class="panel-section layers-section">
+            <div class="section-heading compact">
+              <span class="section-index">04</span>
+              <div><h2>Layers</h2></div>
+              <span class="layer-count" id="layerCount">9</span>
+            </div>
+            <div class="layer-add-row">
+              <button id="addTextBtn" class="mini-action">+ Text</button>
+              <button id="addShapeBtn" class="mini-action">+ Shape</button>
+              <label class="mini-action upload-action">
+                + Image
+                <input id="imageFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden />
+              </label>
+            </div>
+            <div class="layer-list" id="layerList"></div>
+            <button class="keep-safe-btn" id="keepAllSafeBtn">
+              <span>◇</span> Keep all artwork in safe area
+            </button>
+          </section>
+        </aside>
+
+        <section class="stage">
+          <div class="stage-toolbar">
+            <div class="stage-title">
+              <span class="live-dot"></span>
+              <div><span>WORKING CANVAS</span><strong>Flat net + live fold</strong></div>
+            </div>
+            <div class="fold-control">
+              <span>FOLD</span>
+              <input id="foldProgress" type="range" min="0" max="100" value="100" aria-label="Fold progress" />
+              <output id="foldProgressOut">100%</output>
+            </div>
+            <div class="zoom-tools" aria-label="View scale">
+              <button class="icon-btn" id="zoomOutBtn" aria-label="Zoom out">−</button>
+              <span id="zoomLabel">FIT</span>
+              <button class="icon-btn" id="zoomInBtn" aria-label="Zoom in">+</button>
+            </div>
+          </div>
+          <div class="canvas-wrap" id="canvasWrap">
+            <canvas id="editorCanvas" aria-label="Carton dieline editor with live fold preview"></canvas>
+            <div class="canvas-hint" id="canvasHint">
+              <span>↔</span> Drag artwork · corner handles resize · double-click text to edit
+            </div>
+          </div>
+          <footer class="stage-footer">
+            <div class="stage-stat"><span>NET</span><strong id="netSize">844 × 360 mm</strong></div>
+            <div class="stage-stat"><span>MATERIAL</span><strong>E-flute / kraft</strong></div>
+            <div class="stage-stat status-ok" id="safeStatus"><span>SAFE AREA</span><strong>All artwork inside</strong></div>
+            <div class="stage-stat"><span>OUTPUT</span><strong>SVG · PNG</strong></div>
+          </footer>
+        </section>
+
+        <aside class="side-panel right-panel">
+          <section class="panel-section inspector-section">
+            <div class="section-heading compact">
+              <span class="section-index">05</span>
+              <div><h2>Inspector</h2></div>
+              <span class="selection-kind" id="selectionKind">NONE</span>
+            </div>
+            <div class="selection-empty" id="selectionEmpty">
+              <span class="empty-icon">⌖</span>
+              <strong>Select an element</strong>
+              <p>Click artwork on the dieline to edit its content, typography and geometry.</p>
+            </div>
+            <div class="selection-editor" id="selectionEditor" hidden>
+              <label class="stacked-field">
+                <span>Layer name</span>
+                <input id="elementName" />
+              </label>
+              <div class="text-controls" id="textControls">
+                <label class="stacked-field">
+                  <span>Content <small>editable text</small></span>
+                  <textarea id="textContent" rows="3"></textarea>
+                </label>
+                <div class="two-col">
+                  <label class="stacked-field">
+                    <span>Font</span>
+                    <select id="fontFamily">
+                      <option value="DejaVu Sans">DejaVu Sans</option>
+                      <option value="DejaVu Serif">DejaVu Serif</option>
+                      <option value="DejaVu Sans Mono">DejaVu Mono</option>
+                      <option value="Ubuntu">Ubuntu</option>
+                    </select>
+                  </label>
+                  <label class="stacked-field">
+                    <span>Weight</span>
+                    <select id="fontWeight">
+                      <option value="400">Regular</option>
+                      <option value="500">Medium</option>
+                      <option value="600">Semibold</option>
+                      <option value="700">Bold</option>
+                      <option value="800">Heavy</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="two-col">
+                  <label class="stacked-field">
+                    <span>Size <em>mm</em></span>
+                    <input id="fontSize" type="number" min="2.4" max="120" step="0.5" />
+                  </label>
+                  <label class="stacked-field color-field">
+                    <span>Ink</span>
+                    <span><input id="textColor" type="color" /><output id="textColorValue">#173B32</output></span>
+                  </label>
+                </div>
+              </div>
+              <div class="shape-controls" id="shapeControls" hidden>
+                <label class="stacked-field color-field">
+                  <span>Fill</span>
+                  <span><input id="shapeColor" type="color" /><output id="shapeColorValue">#E4572E</output></span>
+                </label>
+              </div>
+              <div class="transform-block">
+                <div class="transform-title"><span>Transform</span><button id="resetTransformBtn">Reset box</button></div>
+                <div class="four-col">
+                  <label><span>X</span><input id="transformX" type="number" min="0" max="100" step="1" /></label>
+                  <label><span>Y</span><input id="transformY" type="number" min="0" max="100" step="1" /></label>
+                  <label><span>W</span><input id="transformW" type="number" min="4" max="100" step="1" /></label>
+                  <label><span>H</span><input id="transformH" type="number" min="2" max="100" step="1" /></label>
+                </div>
+                <label class="rotation-row">
+                  <span>Rotation <output id="rotationValue">0°</output></span>
+                  <input id="rotationRange" type="range" min="-180" max="180" value="0" />
+                </label>
+              </div>
+              <div class="selection-actions">
+                <button id="keepInsideBtn" class="soft-btn">Keep inside</button>
+                <button id="deleteElementBtn" class="danger-btn">Delete</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-section output-section">
+            <div class="section-heading compact">
+              <span class="section-index">06</span>
+              <div><h2>Output check</h2></div>
+              <span class="check-badge" id="checkBadge">READY</span>
+            </div>
+            <div class="check-summary" id="checkSummary">
+              <span class="check-orb">✓</span>
+              <div><strong>Safe to export</strong><p>Margins and editable copy are intact.</p></div>
+            </div>
+            <div class="issue-list" id="issueList"></div>
+          </section>
+
+          <section class="panel-section keyframe-section">
+            <div class="section-heading compact">
+              <span class="section-index">07</span>
+              <div><h2>Fold keyframes</h2></div>
+              <button id="addKeyframeBtn" class="tiny-btn">+ Save</button>
+            </div>
+            <div class="keyframe-track" id="keyframeTrack"></div>
+            <p class="keyframe-note">Keyframes, custom fonts and images are stored with the project and restored exactly.</p>
+            <div class="asset-actions">
+              <label class="asset-btn">
+                <span>Aa</span> Load font
+                <input id="fontFile" type="file" accept=".ttf,.otf,.woff,.woff2" hidden />
+              </label>
+              <button class="asset-btn" id="resetDemoBtn"><span>↺</span> Reset demo</button>
+            </div>
+            <p class="font-meta" id="fontMeta">Font: DejaVu Sans · system</p>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-kicker" id="modalKicker">OUTPUT CHECK</div>
+        <h2 id="modalTitle">Review before export</h2>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-actions" id="modalActions"></div>
+      </div>
+    </div>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
