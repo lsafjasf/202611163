@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Lumen Studio · 光室</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand" aria-label="Lumen Studio">
+          <span class="brand-mark"><i></i></span>
+          <span class="brand-type">
+            <strong>LUMEN</strong>
+            <small>光室 / PHOTO STUDIO</small>
+          </span>
+        </div>
+
+        <div class="project-heading">
+          <span class="eyebrow">CURRENT PROJECT</span>
+          <div class="project-title-row">
+            <input id="projectName" class="project-name" value="暮色沙丘" aria-label="项目名称" />
+            <span id="saveState" class="save-state">未保存</span>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <div class="case-switcher" aria-label="案例">
+            <button class="case-button is-active" data-case="default">默认案例</button>
+            <button class="case-button" data-case="boundary">边界案例</button>
+          </div>
+          <span class="toolbar-divider"></span>
+          <button id="undoBtn" class="icon-button" title="撤销 (Ctrl+Z)" aria-label="撤销">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 4 12l5 5M5 12h8a6 6 0 0 1 6 6" /></svg>
+          </button>
+          <button id="redoBtn" class="icon-button" title="重做 (Ctrl+Shift+Z)" aria-label="重做">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 7 5 5-5 5m4-5h-8a6 6 0 0 0-6 6" /></svg>
+          </button>
+          <span class="toolbar-divider"></span>
+          <button id="reloadBtn" class="button button-quiet">重新载入</button>
+          <button id="saveBtn" class="button button-quiet">保存</button>
+          <button id="exportTopBtn" class="button button-accent">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 15v4h14v-4" /></svg>
+            导出
+          </button>
+        </div>
+      </header>
+
+      <main class="studio">
+        <aside class="preset-panel panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">LOOKS</span>
+              <h2>色彩预设</h2>
+            </div>
+            <button id="newPresetBtn" class="mini-action" title="保存当前调色为预设">＋ 保存</button>
+          </div>
+          <div id="presetGrid" class="preset-grid" aria-label="色彩预设列表"></div>
+
+          <div class="panel-rule"></div>
+          <section class="template-section">
+            <div class="section-label-row">
+              <span class="eyebrow">SCENE</span>
+              <button id="regenerateBtn" class="text-action">换一张 ↻</button>
+            </div>
+            <label class="field-label" for="templateSelect">生成画面</label>
+            <div class="select-wrap">
+              <select id="templateSelect">
+                <option value="dune-dusk">暮色沙丘</option>
+                <option value="tidal-blue">潮汐蓝调</option>
+              </select>
+            </div>
+            <div class="seed-row">
+              <span>生成种子</span>
+              <code id="seedValue">280419</code>
+            </div>
+          </section>
+
+          <div class="panel-rule"></div>
+          <section class="keyframe-section">
+            <div class="section-label-row">
+              <div>
+                <span class="eyebrow">FRAMES</span>
+                <h3>关键帧</h3>
+              </div>
+              <button id="addKeyframeBtn" class="round-action" title="保存当前关键帧">＋</button>
+            </div>
+            <p class="section-help">保存模板、图像、调色、文字与图层的完整状态。</p>
+            <div id="keyframeList" class="keyframe-list"></div>
+          </section>
+
+          <div class="panel-footnote">
+            <span class="live-dot"></span>
+            所有画面均由 Canvas 实时生成
+          </div>
+        </aside>
+
+        <section class="workspace">
+          <div class="workspace-bar">
+            <div class="canvas-meta">
+              <span class="meta-chip"><i class="dot dot-amber"></i>实时预览</span>
+              <span id="canvasSizeChip" class="meta-chip">1200 × 1500</span>
+              <span class="meta-chip">sRGB</span>
+            </div>
+            <div class="canvas-tools">
+              <button id="safeGuidesBtn" class="tool-toggle is-active" aria-pressed="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4" /></svg>
+                安全区
+              </button>
+              <span class="toolbar-divider"></span>
+              <span id="positionReadout" class="position-readout">X 0 · Y 0</span>
+            </div>
+          </div>
+
+          <div id="stageViewport" class="stage-viewport">
+            <div id="stageFrame" class="stage-frame">
+              <canvas id="artCanvas" width="1200" height="1500" aria-label="照片画布"></canvas>
+              <div id="selectionBadge" class="selection-badge" hidden></div>
+            </div>
+            <div class="stage-shadow"></div>
+          </div>
+
+          <div class="stage-footer">
+            <div id="safeStatus" class="safe-status is-ok">
+              <span class="status-icon">✓</span>
+              <span id="safeStatusText">安全区域检查通过</span>
+            </div>
+            <div class="zoom-control">
+              <button id="zoomOutBtn" class="zoom-button" aria-label="缩小">−</button>
+              <button id="zoomFitBtn" class="zoom-value" title="适应窗口">100%</button>
+              <button id="zoomInBtn" class="zoom-button" aria-label="放大">＋</button>
+            </div>
+            <span class="shortcut-hint">拖动元素移动 · 双击文字编辑</span>
+          </div>
+        </section>
+
+        <aside class="inspector-panel panel">
+          <nav class="inspector-tabs" role="tablist" aria-label="属性面板">
+            <button class="inspector-tab is-active" data-tab="adjust" role="tab" aria-selected="true" aria-controls="adjustPanel">调色</button>
+            <button class="inspector-tab" data-tab="layers" role="tab" aria-selected="false" aria-controls="layersPanel">图层</button>
+            <button class="inspector-tab" data-tab="output" role="tab" aria-selected="false" aria-controls="outputPanel">导出</button>
+          </nav>
+
+          <div id="adjustPanel" class="inspector-body tab-panel is-active">
+            <div class="inspector-title-row">
+              <div>
+                <span class="eyebrow">COLOR GRADE</span>
+                <h2>光线与色彩</h2>
+              </div>
+              <button id="resetAdjustBtn" class="text-action">重置</button>
+            </div>
+
+            <div class="control-group">
+              <div class="control-head">
+                <label for="exposure">曝光</label>
+                <output id="exposureValue">+0.18 EV</output>
+              </div>
+              <input id="exposure" class="range" type="range" min="-2" max="2" step="0.01" value="0.18" />
+              <div class="range-scale"><span>−2</span><span>0</span><span>+2</span></div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-head">
+                <label for="temperature">色温</label>
+                <output id="temperatureValue">+14</output>
+              </div>
+              <input id="temperature" class="range range-temp" type="range" min="-100" max="100" step="1" value="14" />
+              <div class="range-scale"><span>冷</span><span>中性</span><span>暖</span></div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-head">
+                <label for="contrast">对比度</label>
+                <output id="contrastValue">+8</output>
+              </div>
+              <input id="contrast" class="range" type="range" min="-100" max="100" step="1" value="8" />
+              <div class="range-scale"><span>柔</span><span>0</span><span>硬</span></div>
+            </div>
+
+            <div class="panel-rule"></div>
+            <div class="split-heading">
+              <div>
+                <span class="eyebrow">SPLIT TONING</span>
+                <h3>分离色调</h3>
+              </div>
+              <span class="split-preview" aria-hidden="true"><i id="shadowSwatch"></i><i id="highlightSwatch"></i></span>
+            </div>
+
+            <div class="tone-card">
+              <div class="tone-title"><span class="tone-dot shadow-dot"></span>阴影</div>
+              <div class="inline-control">
+                <label for="shadowHue">色相</label>
+                <input id="shadowHue" class="range range-hue" type="range" min="0" max="360" step="1" value="22" />
+                <output id="shadowHueValue">22°</output>
+              </div>
+              <div class="inline-control">
+                <label for="shadowStrength">强度</label>
+                <input id="shadowStrength" class="range" type="range" min="0" max="100" step="1" value="16" />
+                <output id="shadowStrengthValue">16</output>
+              </div>
+            </div>
+
+            <div class="tone-card">
+              <div class="tone-title"><span class="tone-dot highlight-dot"></span>高光</div>
+              <div class="inline-control">
+                <label for="highlightHue">色相</label>
+                <input id="highlightHue" class="range range-hue" type="range" min="0" max="360" step="1" value="42" />
+                <output id="highlightHueValue">42°</output>
+              </div>
+              <div class="inline-control">
+                <label for="highlightStrength">强度</label>
+                <input id="highlightStrength" class="range" type="range" min="0" max="100" step="1" value="22" />
+                <output id="highlightStrengthValue">22</output>
+              </div>
+            </div>
+
+            <p class="inspector-note">
+              每次渲染都从原始生成像素重新计算，撤销、重做与切换预设不会累积色差。
+            </p>
+          </div>
+
+          <div id="layersPanel" class="inspector-body tab-panel">
+            <div class="inspector-title-row">
+              <div>
+                <span class="eyebrow">COMPOSITION</span>
+                <h2>可编辑图层</h2>
+              </div>
+              <button id="addTextBtn" class="mini-action">＋ 文字</button>
+            </div>
+            <div id="layerList" class="layer-list" aria-label="图层列表"></div>
+            <div id="layerEditor" class="layer-editor"></div>
+          </div>
+
+          <div id="outputPanel" class="inspector-body tab-panel">
+            <div class="inspector-title-row">
+              <div>
+                <span class="eyebrow">DELIVERY</span>
+                <h2>输出设置</h2>
+              </div>
+              <span id="exportHealth" class="health-badge is-ok">可导出</span>
+            </div>
+
+            <div class="output-segment" role="group" aria-label="导出格式">
+              <button class="segment-button is-active" data-format="png">PNG</button>
+              <button class="segment-button" data-format="svg">SVG · 可编辑</button>
+            </div>
+
+            <div class="output-fields">
+              <label class="field-label" for="exportWidth">导出宽度</label>
+              <div class="number-field">
+                <input id="exportWidth" type="number" min="16" max="4800" step="1" value="1200" />
+                <span>px</span>
+              </div>
+              <p class="field-help">高度按 4:5 自动计算。低于 640px 的尺寸无法保证文字可读。</p>
+            </div>
+
+            <div class="output-card">
+              <div class="output-stat"><span>预览与导出</span><strong>同一渲染管线</strong></div>
+              <div class="output-stat"><span>安全边距</span><strong id="marginValue">72 px</strong></div>
+              <div class="output-stat"><span>文字 / 图形</span><strong id="vectorStat">矢量保留</strong></div>
+            </div>
+
+            <div id="validationList" class="validation-list"></div>
+
+            <button id="exportMainBtn" class="button button-export">
+              <span id="exportButtonLabel">导出 PNG</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 15v4h14v-4" /></svg>
+            </button>
+            <p class="export-note">导出前会重新执行安全边距与文字裁切检查。参数会写入输出文件。</p>
+
+            <div class="panel-rule"></div>
+            <span class="eyebrow">PROJECT FILE</span>
+            <div class="project-file-actions">
+              <button id="downloadProjectBtn" class="button button-quiet">下载项目 JSON</button>
+              <label class="button button-quiet file-button">
+                载入项目
+                <input id="projectFileInput" type="file" accept="application/json,.json" hidden />
+              </label>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <div id="toastRegion" class="toast-region" aria-live="polite"></div>
+
+    <dialog id="presetDialog" class="dialog">
+      <form method="dialog" class="dialog-card">
+        <span class="eyebrow">NEW LOOK</span>
+        <h2>保存色彩预设</h2>
+        <p>保存当前曝光、色温、对比度和分离色调设置。</p>
+        <label class="field-label" for="presetName">预设名称</label>
+        <input id="presetName" class="text-field" maxlength="24" placeholder="例如：暮色胶片" required />
+        <div class="dialog-actions">
+          <button class="button button-quiet" value="cancel">取消</button>
+          <button id="confirmPresetBtn" class="button button-accent" value="default">保存预设</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="exportDialog" class="dialog dialog-wide">
+      <div class="dialog-card">
+        <span id="exportDialogEyebrow" class="eyebrow">EXPORT CHECK</span>
+        <h2 id="exportDialogTitle">发现需要修复的问题</h2>
+        <p id="exportDialogDescription"></p>
+        <div id="exportIssueList" class="export-issues"></div>
+        <div class="dialog-actions">
+          <button id="closeExportDialogBtn" class="button button-quiet">返回修改</button>
+          <button id="autoFixBtn" class="button button-accent">自动适配安全区</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>
