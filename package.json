@@ -1,0 +1,26 @@
+{
+  "name": "uid701",
+  "version": "1.0.0",
+  "description": "Procedural dynamic poster workbench (12s)",
+  "main": "index.js",
+  "scripts": {
+    "test": "node tests/engine.test.js",
+    "e2e": "node tests/e2e/run-e2e.js",
+    "server": "node tests/server.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/202611163.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/202611163/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/202611163#readme",
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>程序化动态海报工作台</title>
+  <link rel="stylesheet" href="src/app/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <h1>程序化动态海报 · 12s</h1>
+      <div class="scenes" id="sceneTabs"></div>
+      <div class="actions">
+        <button id="btnSave">保存工程</button>
+        <button id="btnLoad">重载工程</button>
+        <label class="file-btn">导入 JSON
+          <input type="file" id="fileImport" accept="application/json" hidden />
+        </label>
+        <button id="btnExportJson">导出 JSON</button>
+        <button id="btnExportWebm" class="primary">导出 WebM</button>
+      </div>
+    </header>
+
+    <section class="stage">
+      <canvas id="canvas" width="960" height="540"></canvas>
+      <div class="status" id="status">就绪</div>
+    </section>
+
+    <section class="timeline-panel">
+      <div class="transport">
+        <button id="btnPlay">▶ 播放</button>
+        <button id="btnPause">⏸ 暂停</button>
+        <button id="btnLoop" class="active">循环 开</button>
+        <span class="clock" id="clock">00:00.00 / 00:12.00</span>
+        <span class="clock" id="audioEvent">音频事件：—</span>
+      </div>
+      <div class="timeline" id="timeline">
+        <div class="ruler" id="ruler"></div>
+        <div class="tracks" id="tracks"></div>
+        <div class="playhead" id="playhead"></div>
+      </div>
+      <div class="inout">
+        <label>入点 <input type="number" id="inPoint" step="0.1" min="0" /></label>
+        <label>出点 <input type="number" id="outPoint" step="0.1" min="0" /></label>
+        <label>音频起点 <input type="number" id="audioStart" step="0.05" min="0" /></label>
+        <label>转场
+          <select id="transitionType">
+            <option value="fade">淡入淡出</option>
+            <option value="slide">滑动</option>
+            <option value="none">无</option>
+          </select>
+        </label>
+        <label>转场时长 <input type="number" id="transitionDur" step="0.1" min="0" /></label>
+      </div>
+    </section>
+
+    <section class="keyframe-panel">
+      <h2>关键帧（当前场景）</h2>
+      <div class="layer-selector" id="layerSelector"></div>
+      <div class="kf-editor" id="kfEditor"></div>
+      <button id="btnAddKf">在播放头添加关键帧</button>
+    </section>
+  </main>
+  <script type="module" src="src/app/app.js"></script>
+</body>
+</html>
