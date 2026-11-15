@@ -1,0 +1,178 @@
+:root {
+  --bg: #0e1420;
+  --panel: #17202f;
+  --panel2: #1e2a3d;
+  --line: #2b3a52;
+  --text: #dbe6f4;
+  --muted: #8aa0bd;
+  --accent: #4fc3f7;
+  --good: #57d38a;
+  --warn: #ffb74d;
+  --bad: #ff6b6b;
+  --coil: #7c9cff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.5 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+header h1 { font-size: 17px; margin: 0; }
+header .status {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+}
+header .status.running { color: var(--good); }
+header .status.paused { color: var(--warn); }
+header .status.triggered, header .status.failed { color: var(--bad); }
+header .status.success { color: var(--good); }
+header .spacer { flex: 1; }
+
+main {
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) 360px;
+  gap: 16px;
+  padding: 16px 20px;
+  align-items: start;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+canvas {
+  width: 100%;
+  background: #0a0f18;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  display: block;
+}
+
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+button, select {
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.primary { background: #1c5d8a; border-color: #2a7bb5; }
+
+.scenario-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.scenario-row button.active {
+  background: #1c5d8a;
+  border-color: var(--accent);
+}
+
+.slider { margin: 10px 0; }
+.slider label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.slider label b { color: var(--text); font-weight: 600; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.metric {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.metric .k { font-size: 11px; color: var(--muted); }
+.metric .v { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.metric .v.warn { color: var(--warn); }
+.metric .v.bad { color: var(--bad); }
+.metric .v.good { color: var(--good); }
+
+.limits { font-size: 12px; color: var(--muted); }
+.limits table { width: 100%; border-collapse: collapse; }
+.limits td { padding: 3px 0; }
+.limits td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+
+.event-log {
+  max-height: 170px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+.event-log .ev {
+  padding: 5px 8px;
+  border-left: 2px solid var(--accent);
+  background: var(--panel2);
+  margin-bottom: 5px;
+  border-radius: 0 6px 6px 0;
+}
+.event-log .ev .time { color: var(--muted); margin-right: 6px; }
+#lastChange {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--panel2);
+  border: 1px dashed var(--line);
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.trigger-box {
+  display: none;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #3a1d22;
+  border: 1px solid var(--bad);
+  font-size: 12px;
+}
+.trigger-box.show { display: block; }
+.trigger-box h3 { margin: 0 0 6px; color: var(--bad); font-size: 13px; }
+.trigger-box table { width: 100%; font-variant-numeric: tabular-nums; }
+.trigger-box td { padding: 2px 0; }
+
+.replay-row { display: flex; align-items: center; gap: 10px; }
+.replay-row input[type="range"] { flex: 1; }
+
+label.check { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
+
+footer {
+  padding: 10px 20px 24px;
+  color: var(--muted);
+  font-size: 12px;
+}

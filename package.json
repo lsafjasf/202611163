@@ -1,0 +1,11 @@
+{
+  "name": "coil-ball-rig",
+  "version": "1.0.0",
+  "description": "Four-coil magnetic levitation ball simulator with limits, replay and deterministic physics",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/run-tests.js && node tests/dom-smoke.mjs",
+    "tune": "node tests/tune.js"
+  }
+}
