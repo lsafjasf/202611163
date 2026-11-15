@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MESH LAB · 三轴齿轮传动台</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='24' fill='%230b1319' stroke='%23ff8a3d' stroke-width='8'/%3E%3Ccircle cx='32' cy='32' r='8' fill='%2349d6cb'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient-grid"></div>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <div>
+        <p class="eyebrow">TRANSMISSION DYNAMICS / UNIT 07</p>
+        <h1>MESH<span>LAB</span></h1>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <span class="pulse-dot"></span>
+      <span id="systemState">系统待机</span>
+      <span class="divider"></span>
+      <span id="clockLabel">T+ 00.000 s</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-button" id="soundButton" type="button" aria-label="切换声音">
+        <span class="sound-icon">◖</span><span id="soundLabel">声音开启</span>
+      </button>
+      <div class="shift-chip">A 班 · 操作员 01</div>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="panel configuration-panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">01 / ASSEMBLY</p>
+          <h2>齿轮装配</h2>
+        </div>
+        <span class="tiny-badge">3 轴</span>
+      </div>
+
+      <div class="mission-card">
+        <span class="mission-kicker">当前任务</span>
+        <div class="mission-target">
+          <strong id="missionTarget">64.3</strong>
+          <span>RPM<br>目标输出</span>
+        </div>
+        <p>为输入轴、惰轮轴与输出轴配齐齿轮，使输出转速进入目标窗口。</p>
+        <div class="target-window">
+          <span>目标窗口</span>
+          <b id="targetWindow">63.5 — 65.1 RPM</b>
+        </div>
+      </div>
+
+      <div class="section-label">
+        <span>已安装</span>
+        <button class="text-button" id="clearGearsButton" type="button">全部拆下</button>
+      </div>
+      <div class="gear-slots" id="gearSlots"></div>
+
+      <div class="section-label">
+        <span>齿轮库</span>
+        <span class="hint" id="selectionHint">先选择轴位</span>
+      </div>
+      <div class="gear-library" id="gearLibrary"></div>
+
+      <div class="mesh-readout">
+        <div><span>轴距 A</span><strong id="centerA">70.0</strong><small>mm</small></div>
+        <div><span>轴距 B</span><strong id="centerB">82.0</strong><small>mm</small></div>
+        <div><span>啮合间隙</span><strong id="meshGap">—</strong><small>齿</small></div>
+      </div>
+
+      <div class="section-label scenario-heading">
+        <span>工况验证</span>
+        <button class="text-button" id="validateButton" type="button">重新验证</button>
+      </div>
+      <div class="scenario-list" id="scenarioList"></div>
+    </aside>
+
+    <section class="stage-column">
+      <div class="stage-panel">
+        <div class="stage-toolbar">
+          <div class="stage-title">
+            <span class="status-light" id="stageLight"></span>
+            <div>
+              <p class="eyebrow">CUTAWAY VIEW / LIVE</p>
+              <h2 id="stageTitle">三轴减速箱</h2>
+            </div>
+          </div>
+          <div class="stage-readouts">
+            <div><span>INPUT</span><b id="stageInput">90.0</b><small>rpm</small></div>
+            <div class="accent"><span>OUTPUT</span><b id="stageOutput">0.0</b><small>rpm</small></div>
+            <div><span>NOISE</span><b id="stageNoise">—</b><small>dBA</small></div>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="scene" width="940" height="520" aria-label="三轴齿轮传动箱实时剖面"></canvas>
+          <div class="canvas-tag tag-input"><span>输入轴</span><b id="tagInput">— T</b></div>
+          <div class="canvas-tag tag-idler"><span>惰轮轴</span><b id="tagIdler">— T</b></div>
+          <div class="canvas-tag tag-output"><span>输出轴</span><b id="tagOutput">— T</b></div>
+          <div class="resume-flag" id="resumeFlag">恢复运行 · 受力方向已刷新</div>
+          <div class="canvas-legend">
+            <span><i class="legend-force"></i>切向力</span>
+            <span><i class="legend-speed"></i>转速趋势</span>
+            <span><i class="legend-alert"></i>越限点</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-strip" id="metricStrip"></div>
+
+      <div class="analysis-grid">
+        <section class="panel trend-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">02 / TELEMETRY</p>
+              <h2>运行趋势</h2>
+            </div>
+            <div class="chart-legend">
+              <span><i class="dot speed"></i>转速</span>
+              <span><i class="dot pressure"></i>压力</span>
+              <span><i class="dot temp"></i>温度</span>
+            </div>
+          </div>
+          <canvas id="trendChart" width="920" height="190"></canvas>
+        </section>
+
+        <section class="panel change-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">LAST CHANGE</p>
+              <h2>最近一次变化</h2>
+            </div>
+            <span class="time-chip" id="changeTime">T+ 00.000</span>
+          </div>
+          <div class="change-main">
+            <span class="change-icon" id="changeIcon">↻</span>
+            <div>
+              <p id="changeTitle">等待操作</p>
+              <strong id="changeValue">初始状态</strong>
+              <small id="changeDetail">所有积分器位于零位</small>
+            </div>
+          </div>
+          <div class="change-log" id="changeLog"></div>
+        </section>
+      </div>
+    </section>
+
+    <aside class="panel control-panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">03 / CONTROL</p>
+          <h2>台架控制</h2>
+        </div>
+        <span class="tiny-badge" id="stepBadge">Δt 16.7 ms</span>
+      </div>
+      <div class="output-gauge">
+        <div class="gauge-top">
+          <span>输出轴 / TARGET</span>
+          <span id="gaugeDelta">—</span>
+        </div>
+        <div class="gauge-value"><strong id="gaugeOutput">0.0</strong><span>RPM</span></div>
+        <div class="target-track">
+          <span class="target-zone" id="targetZone"></span>
+          <span class="target-needle" id="targetNeedle"></span>
+        </div>
+        <div class="gauge-scale"><span>0</span><span>32</span><span>64</span><span>96</span><span>128</span></div>
+      </div>
+
+      <div class="transport-grid">
+        <button class="primary-button" id="runButton" type="button">
+          <span class="button-icon" id="runIcon">▶</span>
+          <span><b id="runLabel">启动仿真</b><small id="runSubLabel">SPACE</small></span>
+        </button>
+        <button class="square-button" id="stepButton" type="button" title="单步前进 16.7 ms">
+          <span>⇥</span><small>单步</small>
+        </button>
+        <button class="square-button" id="resetButton" type="button" title="重置初始条件">
+          <span>↺</span><small>重置</small>
+        </button>
+        <button class="square-button" id="replayButton" type="button" title="回放最近一次运行">
+          <span>▷</span><small>回放</small>
+        </button>
+      </div>
+
+      <div class="slider-group">
+        <label class="slider-row">
+          <span><b>输入转速</b><output id="speedOutput">90 RPM</output></span>
+          <input id="speedSlider" type="range" min="40" max="130" step="1" value="90">
+          <small><i>安全 50–115</i><i>硬限 45–120</i></small>
+        </label>
+        <label class="slider-row">
+          <span><b>负载扭矩</b><output id="loadOutput">1.15 N·m</output></span>
+          <input id="loadSlider" type="range" min="0.2" max="4.0" step="0.05" value="1.15">
+          <small><i>建议 ≤ 3.00</i><i>硬限 3.60</i></small>
+        </label>
+      </div>
+
+      <div class="live-values">
+        <div><span>压力</span><b id="livePressure">0.00</b><small>MPa</small></div>
+        <div><span>油温</span><b id="liveTemp">24.0</b><small>°C</small></div>
+        <div><span>振动</span><b id="liveVibration">0.0</b><small>mm/s</small></div>
+        <div><span>传动比</span><b id="liveRatio">—</b><small>i</small></div>
+      </div>
+
+      <div class="safety-envelope">
+        <div class="safety-title"><span>安全包络</span><b id="safetyStatus">NOMINAL</b></div>
+        <div class="limit-row"><span>压力上限</span><div class="limit-bar"><i id="pressureBar"></i></div><b>2.20 MPa</b></div>
+        <div class="limit-row"><span>温度上限</span><div class="limit-bar"><i id="tempBar"></i></div><b>105 °C</b></div>
+        <div class="limit-row"><span>当前负载</span><div class="limit-bar"><i id="loadBar"></i></div><b id="loadLimitText">1.15 / 3.00</b></div>
+      </div>
+
+      <div class="diagnostics">
+        <div><span>状态哈希</span><b id="stateHash">00000000</b></div>
+        <div><span>重置漂移</span><b id="resetDrift">—</b></div>
+        <div><span>重复偏差</span><b id="repeatDelta">—</b></div>
+        <div><span>回放平滑度</span><b id="replaySmoothness">—</b></div>
+      </div>
+      <div class="trigger-card" id="triggerCard">
+        <span class="trigger-kicker">TRIGGER POINT</span>
+        <strong id="triggerTitle">尚无触发</strong>
+        <p id="triggerDetail">安全联锁已就绪，越限后停止积分。</p>
+      </div>
+      <p class="keyboard-hint"><kbd>SPACE</kbd> 暂停 / 恢复 <kbd>N</kbd> 单步 <kbd>R</kbd> 重置</p>
+    </aside>
+  </main>
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
