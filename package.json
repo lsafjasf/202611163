@@ -1,0 +1,19 @@
+{
+  "name": "gyro-balance-simulator",
+  "version": "1.0.0",
+  "description": "三轴偏置与转速调节的陀螺平衡校准仿真台（确定性物理内核 + Canvas + Web Audio）",
+  "private": true,
+  "scripts": {
+    "start": "node tools/serve.js",
+    "test": "node tools/selftest.js",
+    "tune": "node tools/tune.js"
+  },
+  "keywords": [
+    "gyroscope",
+    "simulation",
+    "canvas",
+    "web-audio",
+    "deterministic"
+  ],
+  "license": "MIT"
+}
