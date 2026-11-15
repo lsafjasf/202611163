@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>片头工作室 · 10s 可编辑片头</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header id="topbar">
+  <h1>片头工作室</h1>
+  <div class="spacer"></div>
+  <label>场景
+    <select id="sceneSelect"></select>
+  </label>
+  <button id="btnAddScene">＋场景</button>
+  <button id="btnSaveJson">保存工程 JSON</button>
+  <button id="btnLoadJson">打开工程…</button>
+  <input type="file" id="fileInput" accept="application/json" hidden>
+</header>
+
+<main>
+  <section id="stage">
+    <canvas id="preview" width="960" height="540"></canvas>
+    <div id="transport">
+      <button id="btnPlay" title="播放/暂停 (空格)">▶</button>
+      <button id="btnStop" title="回到入点">⏮</button>
+      <label class="chk"><input type="checkbox" id="chkLoop"> 循环</label>
+      <span id="timecode">00:00.000 / 00:10.000</span>
+      <span id="inout">入点 0.00s · 出点 10.00s</span>
+    </div>
+    <div id="timeline">
+      <canvas id="ruler" width="960" height="26"></canvas>
+      <div id="trackArea"></div>
+      <div id="playhead"></div>
+    </div>
+  </section>
+
+  <aside id="inspector">
+    <h2>图层关键帧</h2>
+    <label>图层
+      <select id="layerSelect">
+        <option value="wave">波浪背景</option>
+        <option value="title">标题</option>
+        <option value="lightband">光带</option>
+      </select>
+    </label>
+    <label>属性 <select id="propSelect"></select></label>
+    <div class="row">
+      <input type="number" id="propValue" step="0.01">
+      <button id="btnSetKey">在当前时间设关键帧</button>
+    </div>
+    <ul id="keyList"></ul>
+
+    <h2>字幕</h2>
+    <div class="row">
+      <input type="text" id="subText" placeholder="字幕文本">
+      <button id="btnAddSub">加入当前时间</button>
+    </div>
+    <ul id="subList"></ul>
+
+    <h2>音频事件</h2>
+    <div class="row">
+      <select id="audioType">
+        <option value="whoosh">呼啸</option>
+        <option value="chime">钟声</option>
+        <option value="pulse">脉冲</option>
+      </select>
+      <button id="btnAddAudio">加入当前时间</button>
+    </div>
+    <ul id="audioList"></ul>
+
+    <h2>导出</h2>
+    <div class="row">
+      <button id="btnExport">导出 WebM</button>
+      <button id="btnCancelExport" disabled>取消导出</button>
+    </div>
+    <progress id="exportProgress" value="0" max="1"></progress>
+    <div id="exportStatus"></div>
+
+    <h2>一致性自检</h2>
+    <button id="btnSelfTest">运行自检</button>
+    <pre id="selfTestOut"></pre>
+  </aside>
+</main>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

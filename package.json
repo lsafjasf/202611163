@@ -1,0 +1,30 @@
+{
+  "name": "uid707",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u00002\u00000\u00002\u00006\u00001\u00001\u00001\u00006\u00003\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "npx http-server -p 8080 -c-1",
+    "test": "node test/logic.test.mjs",
+    "test:e2e": "node test/e2e.test.mjs && node test/verify-webm.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/202611163.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/202611163/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/202611163#readme",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "playwright": "^1.65.1"
+  }
+}
