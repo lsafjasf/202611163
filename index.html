@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>城市颗粒物浓度三维切片分析</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>城市颗粒物浓度三维切片分析</h1>
+    <div class="badges">
+      <span class="badge" id="versionBadge"></span>
+      <span class="badge" id="unitBadge"></span>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <label>数据集
+      <select id="datasetSel">
+        <option value="normal">正常数据</option>
+        <option value="missing">缺失数据</option>
+        <option value="duplicate">重复+异常数据</option>
+      </select>
+    </label>
+    <label>污染物
+      <select id="pollutantSel">
+        <option value="pm25">PM2.5</option>
+        <option value="pm10">PM10</option>
+      </select>
+    </label>
+    <label>区域
+      <select id="regionSel">
+        <option value="all">全部</option>
+        <option value="center">城市中心</option>
+        <option value="suburb">郊区</option>
+      </select>
+    </label>
+    <div class="windows" id="windowBtns"></div>
+    <label class="slider">水平切片阈值
+      <input type="range" id="hSlice" min="0" max="100" step="1" value="0">
+      <span id="hSliceVal">关闭</span>
+    </label>
+    <label class="slider">垂直切片列
+      <input type="range" id="vSlice" min="-1" max="15" step="1" value="-1">
+      <span id="vSliceVal">关闭</span>
+    </label>
+    <button id="exportPng">导出 PNG</button>
+    <button id="exportCsv">导出 CSV</button>
+  </section>
+
+  <section class="status">
+    <div id="filterLine"></div>
+    <div id="caliberLine" class="caliber"></div>
+  </section>
+
+  <main>
+    <div class="panel mesh-panel">
+      <h2>三维浓度网格（等轴测）</h2>
+      <canvas id="meshCanvas" width="760" height="560"></canvas>
+      <canvas id="legendCanvas" width="760" height="46"></canvas>
+    </div>
+    <div class="side">
+      <div class="panel">
+        <h2>垂直剖面</h2>
+        <canvas id="profileCanvas" width="360" height="220"></canvas>
+      </div>
+      <div class="panel">
+        <h2>热点清单（与切面同步）</h2>
+        <table id="hotspotTable">
+          <thead><tr><th>#</th><th>网格</th><th>区域</th><th>浓度</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>数据质量摘要</h2>
+        <ul id="qualityList" class="quality"></ul>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/data-raw.js"></script>
+  <script src="js/pipeline.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

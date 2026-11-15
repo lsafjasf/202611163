@@ -1,0 +1,10 @@
+{
+  "name": "pm3d-slice-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "城市颗粒物浓度三维切片分析（Canvas 渲染，固定样例数据）",
+  "scripts": {
+    "test": "node test/run-tests.js && node test/smoke-dom.js",
+    "start": "python3 -m http.server 8000"
+  }
+}

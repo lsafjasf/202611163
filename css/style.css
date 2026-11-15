@@ -1,0 +1,85 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #0e1420;
+  color: #dfe6ef;
+}
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 22px 6px;
+}
+header h1 { font-size: 20px; margin: 0; }
+.badge {
+  background: #1c2942;
+  border: 1px solid #31456b;
+  border-radius: 10px;
+  padding: 2px 10px;
+  font-size: 12px;
+  color: #9fc2ff;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 22px;
+  background: #141c2c;
+  border-top: 1px solid #22304a;
+  border-bottom: 1px solid #22304a;
+  font-size: 13px;
+}
+.toolbar select, .toolbar button {
+  background: #1c2942;
+  color: #dfe6ef;
+  border: 1px solid #31456b;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+.toolbar button { cursor: pointer; }
+.toolbar button:hover { background: #26395c; }
+.toolbar label { display: flex; align-items: center; gap: 6px; }
+.slider input[type="range"] { width: 120px; }
+.slider span { min-width: 52px; color: #9fc2ff; font-variant-numeric: tabular-nums; }
+.windows { display: flex; gap: 4px; }
+.windows button.active { background: #2f5da8; border-color: #5b8de0; }
+.status {
+  padding: 8px 22px;
+  font-size: 13px;
+  background: #101827;
+  border-bottom: 1px solid #22304a;
+}
+.status .caliber { color: #8fa3bd; font-size: 12px; margin-top: 2px; }
+main {
+  display: flex;
+  gap: 14px;
+  padding: 14px 22px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.panel {
+  background: #141c2c;
+  border: 1px solid #22304a;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.panel h2 { font-size: 14px; margin: 0 0 8px; color: #aebdd4; font-weight: 600; }
+.side { display: flex; flex-direction: column; gap: 14px; }
+canvas { display: block; border-radius: 6px; background: #0b101b; }
+#meshCanvas { cursor: crosshair; }
+table { border-collapse: collapse; width: 100%; font-size: 12px; }
+th, td { padding: 4px 8px; text-align: right; border-bottom: 1px solid #22304a; }
+th { color: #8fa3bd; font-weight: 600; }
+td.num { font-variant-numeric: tabular-nums; color: #ffd98a; }
+tr.on-slice td { color: #7cc8ff; }
+.quality { list-style: none; margin: 0; padding: 0; font-size: 12px; }
+.quality li {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  border-bottom: 1px dashed #22304a;
+}
+.quality li b { color: #ffd98a; font-variant-numeric: tabular-nums; }
