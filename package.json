@@ -1,0 +1,11 @@
+{
+  "name": "metro-network-compare",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test",
+    "check": "node --check src/app.js && node --check src/canvas.js && node --check src/data.js && node --check src/export.js && node --check src/model.js && node --check src/pipeline.js && node --check src/routing.js && node --check src/state.js"
+  }
+}

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08111f" />
+    <title>轨脉 · 抽象地铁网络分析</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div class="page-glow page-glow--one"></div>
+    <div class="page-glow page-glow--two"></div>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="轨脉首页">
+          <span class="brand-mark" aria-hidden="true">轨</span>
+          <span>
+            <strong>轨脉</strong>
+            <small>METRO GRAPH LAB</small>
+          </span>
+        </a>
+        <div class="topbar-context">
+          <span class="context-kicker">抽象地铁网络 / 固定数据沙盘</span>
+          <span class="context-title">双目标路径比较与运营数据质量观察</span>
+        </div>
+        <div class="topbar-actions">
+          <div class="version-chip" title="当前数据集版本">
+            <span class="status-dot"></span>
+            <span>数据版本</span>
+            <strong id="data-version">—</strong>
+          </div>
+          <button class="button button--ghost" id="export-csv" type="button">导出明细 CSV</button>
+          <button class="button button--primary" id="export-map" type="button">
+            <span aria-hidden="true">↗</span> 导出路线图
+          </button>
+        </div>
+      </header>
+
+      <section class="filter-bar" aria-labelledby="filter-title">
+        <div class="filter-heading">
+          <span class="eyebrow">LIVE FILTER</span>
+          <h2 id="filter-title">筛选台</h2>
+          <p>时间窗口与数据样本变化会同步重算图形、路径和列表。</p>
+        </div>
+        <div class="filter-control filter-control--window">
+          <span class="control-label">时间窗口</span>
+          <div class="segmented" id="window-filter" role="group" aria-label="时间窗口"></div>
+        </div>
+        <div class="filter-control filter-control--dataset">
+          <span class="control-label">原始数据样本</span>
+          <div class="segmented segmented--compact" id="dataset-filter" role="group" aria-label="数据集样本"></div>
+        </div>
+        <div class="scope-note">
+          <span class="scope-icon" aria-hidden="true">i</span>
+          <div>
+            <strong>统计口径</strong>
+            <span id="stat-scope">—</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard">
+        <article class="panel map-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">NETWORK CANVAS</span>
+              <h2>抽象线网图</h2>
+            </div>
+            <div class="panel-meta">
+              <span class="live-pill"><span></span><b id="window-label">—</b></span>
+              <span id="network-counts">—</span>
+            </div>
+          </div>
+          <div class="canvas-toolbar">
+            <div class="legend" id="line-legend" aria-label="线路图例"></div>
+            <div class="canvas-hint">点击站点设为终点 · <kbd>Alt</kbd> + 点击设为起点</div>
+          </div>
+          <div class="canvas-wrap" id="canvas-wrap">
+            <canvas
+              id="network-canvas"
+              width="1200"
+              height="720"
+              role="img"
+              aria-label="抽象地铁网络图，包含四条线路、站点、停运区间与路径高亮"
+            ></canvas>
+            <div class="canvas-tooltip" id="canvas-tooltip" hidden></div>
+          </div>
+          <div class="canvas-footer">
+            <div class="metric-strip">
+              <span><b id="metric-valid-segments">—</b> 有效区间</span>
+              <span><b id="metric-stations">—</b> 站点</span>
+              <span><b id="metric-closures">—</b> 停运区间</span>
+              <span><b id="metric-labels">置顶</b> 标签层</span>
+            </div>
+            <p id="network-note">—</p>
+          </div>
+        </article>
+
+        <aside class="panel route-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">ROUTE DUEL</span>
+              <h2>出行方案比较</h2>
+            </div>
+            <span class="transfer-rule" id="transfer-rule">换乘等待 —</span>
+          </div>
+
+          <div class="station-picker">
+            <label>
+              <span>起点</span>
+              <select id="origin-select" aria-label="选择起点"></select>
+            </label>
+            <button class="swap-button" id="swap-route" type="button" aria-label="交换起点终点">⇄</button>
+            <label>
+              <span>终点</span>
+              <select id="destination-select" aria-label="选择终点"></select>
+            </label>
+          </div>
+
+          <div class="route-list" id="route-list" aria-live="polite"></div>
+          <div class="route-delta" id="route-delta"></div>
+          <div class="route-legend">
+            <span><i class="route-swatch route-swatch--fast"></i>最短时间</span>
+            <span><i class="route-swatch route-swatch--easy"></i>最少换乘</span>
+            <span><i class="route-swatch route-swatch--closed"></i>停运区间</span>
+          </div>
+        </aside>
+
+        <article class="panel table-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">SERVICE LEDGER</span>
+              <h2>线路明细</h2>
+            </div>
+            <span class="table-summary" id="table-summary">—</span>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>线路</th>
+                  <th>区间</th>
+                  <th>运行分钟</th>
+                  <th>有效记录</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody id="segment-table"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <aside class="panel quality-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">DATA HEALTH</span>
+              <h2>数据质量摘要</h2>
+            </div>
+            <span class="quality-version" id="quality-version">—</span>
+          </div>
+          <div class="quality-overview">
+            <div class="quality-score">
+              <div class="score-ring" id="quality-ring">
+                <span><strong id="quality-rate">—</strong><small>有效率</small></span>
+              </div>
+            </div>
+            <div class="quality-counters" id="quality-counters"></div>
+          </div>
+          <p class="quality-equation" id="quality-equation">—</p>
+          <details class="raw-details">
+            <summary>查看原始样例与清洗规则 <span id="raw-count-label">—</span></summary>
+            <div class="raw-table-wrap">
+              <table class="raw-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>线路</th>
+                    <th>区间</th>
+                    <th>分钟</th>
+                    <th>判定</th>
+                  </tr>
+                </thead>
+                <tbody id="raw-table"></tbody>
+              </table>
+            </div>
+            <p class="rules-copy" id="rules-copy">—</p>
+          </details>
+        </aside>
+      </section>
+
+      <footer class="page-footer">
+        <span>DUAL-OBJECTIVE ROUTING · DETERMINISTIC DATA PIPELINE</span>
+        <span>图形、表格与导出共用同一计算模型</span>
+      </footer>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
