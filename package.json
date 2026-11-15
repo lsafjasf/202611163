@@ -1,0 +1,9 @@
+{
+  "name": "gondola-coop",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test/sim.test.mjs && node test/browser.smoke.mjs",
+    "start": "python3 -m http.server 8000"
+  }
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>双人吊篮协作 · Gondola Co-op</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0d1b2a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: monospace;
+      color: #adb5bd;
+    }
+    canvas {
+      display: block;
+      margin-top: 8px;
+      border: 1px solid #415a77;
+    }
+    p { margin: 6px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="960" height="640"></canvas>
+  <p>
+    左席 W/S(升降) 或 A/D(摆臂) + F 急停 · 右席 方向键 + Enter 急停 ·
+    P 暂停 · R 重开 · Q 轮换控制侧 · T 单人调试 · V 回放
+  </p>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
