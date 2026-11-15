@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>三折产品说明编辑器</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div class="brand">三折产品说明编辑器</div>
+    <div class="toolbar-group">
+      <button id="btn-undo" title="撤销 Ctrl+Z">↶ 撤销</button>
+      <button id="btn-redo" title="重做 Ctrl+Y / Ctrl+Shift+Z">↷ 重做</button>
+    </div>
+    <div class="toolbar-group">
+      <button id="btn-new">新建</button>
+      <button id="btn-default-case">默认案例</button>
+      <button id="btn-edge-case">边界案例</button>
+    </div>
+    <div class="toolbar-group">
+      <button id="btn-save">保存 JSON</button>
+      <button id="btn-load">载入 JSON</button>
+      <input type="file" id="file-load" accept="application/json,.json" hidden />
+      <button id="btn-autosave">本地暂存</button>
+    </div>
+    <div class="toolbar-group">
+      <button id="btn-svg">导出 SVG</button>
+      <button id="btn-png">导出 PNG</button>
+    </div>
+    <div class="toolbar-group">
+      <button id="btn-selftest">自检</button>
+    </div>
+  </header>
+
+  <div id="workspace">
+    <aside id="sidebar">
+      <section class="panel" id="panel-fold">
+        <h3>折叠角度</h3>
+        <label class="row">
+          角度
+          <input type="range" id="fold-angle" min="0" max="180" step="1" value="0" />
+          <span id="fold-angle-val">0°</span>
+        </label>
+        <div class="row">
+          <button id="btn-angle-flat" class="mini">展开 0°</button>
+          <button id="btn-angle-folded" class="mini">折叠 180°</button>
+        </div>
+        <h4>关键帧</h4>
+        <div class="row">
+          <input type="text" id="kf-name" placeholder="关键帧名称" />
+          <button id="btn-kf-add" class="mini">记录</button>
+        </div>
+        <ul id="kf-list" class="kf-list"></ul>
+      </section>
+
+      <section class="panel" id="panel-elements">
+        <h3>内容</h3>
+        <div class="row wrap">
+          <button id="btn-add-text" class="mini">+ 文字</button>
+          <button id="btn-add-image" class="mini">+ 图片</button>
+          <button id="btn-add-shape" class="mini">+ 图形</button>
+          <input type="file" id="file-image" accept="image/*" hidden />
+        </div>
+        <ul id="element-list" class="element-list"></ul>
+      </section>
+
+      <section class="panel" id="panel-props">
+        <h3>属性</h3>
+        <div id="props-empty" class="muted">未选中元素</div>
+        <div id="props-form" hidden></div>
+      </section>
+
+      <section class="panel" id="panel-resources">
+        <h3>模板 / 字体</h3>
+        <div class="row wrap">
+          <button id="btn-save-template" class="mini">存为模板</button>
+          <button id="btn-apply-template" class="mini">套用模板</button>
+          <button id="btn-add-font" class="mini">+ 字体</button>
+          <input type="file" id="file-font" accept=".woff,.woff2,.ttf,.otf" hidden />
+        </div>
+        <ul id="font-list" class="kf-list"></ul>
+      </section>
+
+      <section class="panel" id="panel-check">
+        <h3>安全检查</h3>
+        <button id="btn-validate" class="mini">立即检查</button>
+        <button id="btn-autofix" class="mini">自动修复</button>
+        <ul id="check-list" class="check-list"></ul>
+      </section>
+    </aside>
+
+    <main id="stage-wrap">
+      <canvas id="stage"></canvas>
+      <div id="text-editor" hidden>
+        <textarea spellcheck="false"></textarea>
+      </div>
+      <div id="stage-hint" class="muted">
+        滚轮缩放 · 空格/右键拖动平移 · 双击文字编辑 · 拖动元素移动 · 拖手柄缩放
+      </div>
+    </main>
+  </div>
+
+  <footer id="statusbar">
+    <span id="status-text">就绪</span>
+    <span id="status-zoom"></span>
+  </footer>
+</div>
+<script src="js/util.js"></script>
+<script src="js/model.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/history.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/canvas-view.js"></script>
+<script src="js/svg-export.js"></script>
+<script src="js/png-export.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
+@@
+ <script src="js/png-export.js"></script>
++<script src="js/validate.js"></script>
+ <script src="js/app.js"></script>
