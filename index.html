@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>双参数动画对比 · Canvas 差分时间线</title>
+<style>
+  :root { --bg:#14161a; --panel:#1d2026; --line:#2c313a; --fg:#e6e9ee; --dim:#8b93a1; --acc:#4da3ff; --warn:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 "PingFang SC","Microsoft YaHei",sans-serif; }
+  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:16px; margin:0; font-weight:600; }
+  .views { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:12px 16px; }
+  .view { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:8px; }
+  .view h2 { font-size:12px; margin:0 0 6px; color:var(--dim); font-weight:600; display:flex; justify-content:space-between; }
+  canvas { width:100%; display:block; background:#000; border-radius:4px; image-rendering:pixelated; }
+  .diffstat { color:var(--warn); font-variant-numeric:tabular-nums; }
+  .transport { display:flex; gap:10px; align-items:center; padding:10px 16px; border-top:1px solid var(--line); flex-wrap:wrap; }
+  button { background:var(--panel); color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:6px 14px; cursor:pointer; font-size:13px; }
+  button:hover { border-color:var(--acc); }
+  button.primary { background:var(--acc); border-color:var(--acc); color:#0b1521; font-weight:600; }
+  button.active { outline:2px solid var(--acc); }
+  input[type=range] { flex:1; min-width:200px; accent-color:var(--acc); }
+  input[type=number] { width:70px; background:var(--panel); color:var(--fg); border:1px solid var(--line); border-radius:4px; padding:4px 6px; }
+  select { background:var(--panel); color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:6px; }
+  .time { font-variant-numeric:tabular-nums; color:var(--acc); min-width:150px; }
+  .status { padding:8px 16px; color:var(--dim); font-size:12px; border-top:1px solid var(--line); white-space:pre-wrap; }
+  .group { display:flex; gap:6px; align-items:center; }
+  label { color:var(--dim); font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>双参数动画对比</h1>
+  <div class="group">
+    <label>场景</label>
+    <select id="sceneSel"></select>
+  </div>
+  <div class="group">
+    <button id="saveBtn">保存工程</button>
+    <button id="loadBtn">重新载入</button>
+    <button id="exportBtn" class="primary">导出当前对比图</button>
+  </div>
+  <div class="group">
+    <label>入点</label><input id="inPt" type="number" step="0.1" min="0">
+    <label>出点</label><input id="outPt" type="number" step="0.1" min="0">
+    <label>总时长 <span id="durLbl"></span></label>
+  </div>
+</header>
+
+<div class="views">
+  <div class="view"><h2><span>原始 · 参数组 A</span><span id="paramsA"></span></h2><canvas id="viewA" width="480" height="270"></canvas></div>
+  <div class="view"><h2><span>原始 · 参数组 B</span><span id="paramsB"></span></h2><canvas id="viewB" width="480" height="270"></canvas></div>
+  <div class="view"><h2><span>叠加 (A+B 50%)</span></h2><canvas id="viewMix" width="480" height="270"></canvas></div>
+  <div class="view"><h2><span>差分</span><span class="diffstat" id="diffStat">—</span></h2><canvas id="viewDiff" width="480" height="270"></canvas></div>
+</div>
+
+<div class="transport">
+  <button id="playBtn">▶ 播放</button>
+  <button id="loopBtn" class="active">🔁 循环</button>
+  <input id="scrub" type="range" min="0" max="8" step="0.001" value="0">
+  <span class="time" id="timeLbl">0.000 / 8.000</span>
+</div>
+
+<div class="status" id="status">就绪。拖动时间轴查看三个视图同步更新。</div>
+
+<script src="core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
