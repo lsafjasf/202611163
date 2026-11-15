@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>音画同步时间线 · 18s / 10 闪光 / 10 节拍</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>音画同步时间线</h1>
+    <span id="clock" class="clock">00:00.000</span>
+  </header>
+
+  <main>
+    <section class="stage-wrap">
+      <canvas id="stage" width="960" height="360"></canvas>
+    </section>
+
+    <section class="transport">
+      <button id="btn-play">播放</button>
+      <button id="btn-prev" title="上一帧">&#9664;&#9612;</button>
+      <button id="btn-next" title="下一帧">&#9612;&#9654;</button>
+      <label><input type="checkbox" id="chk-loop" checked> 循环</label>
+      <label>音频偏移
+        <input type="range" id="offset" min="-0.5" max="0.5" step="0.005" value="0">
+        <span id="offset-val">+0.000s</span>
+      </label>
+      <select id="scene-select"></select>
+    </section>
+
+    <section class="timeline-wrap">
+      <canvas id="timeline" width="960" height="160"></canvas>
+    </section>
+
+    <section class="panels">
+      <div class="panel">
+        <h2>闪光 / 节拍差值</h2>
+        <table id="diff-table">
+          <thead><tr><th>#</th><th>闪光(s)</th><th>节拍(s)</th><th>差值(ms)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>工程</h2>
+        <div class="btn-row">
+          <button id="btn-save">保存工程</button>
+          <button id="btn-export-json">导出 JSON</button>
+          <button id="btn-import-json">导入 JSON</button>
+          <input type="file" id="file-import" accept=".json" hidden>
+        </div>
+        <div class="btn-row">
+          <button id="btn-export-video">导出视频 (WebM)</button>
+          <button id="btn-verify">一致性验证</button>
+        </div>
+        <pre id="log" class="log"></pre>
+      </div>
+    </section>
+  </main>
+
+  <script src="model.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
