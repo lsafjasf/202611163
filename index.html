@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>弹性桥三车通行模拟</title>
+<style>
+  :root { --bg:#10141c; --panel:#1a2130; --fg:#dfe7f5; --dim:#8b98b0; --acc:#4fc3f7; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--fg);
+         font:14px/1.5 "Segoe UI", "PingFang SC", sans-serif; }
+  h1 { font-size:18px; margin:0 0 12px; }
+  #wrap { display:flex; gap:16px; flex-wrap:wrap; }
+  #left { flex:1 1 720px; min-width:640px; }
+  #side { flex:0 0 340px; display:flex; flex-direction:column; gap:10px; }
+  canvas { background:#0b0f16; border:1px solid #2a3548; border-radius:8px; width:100%; }
+  .card { background:var(--panel); border:1px solid #2a3548; border-radius:8px; padding:10px 12px; }
+  .card h2 { font-size:13px; margin:0 0 8px; color:var(--acc); letter-spacing:1px; }
+  .row { display:flex; align-items:center; gap:8px; margin:6px 0; }
+  .row label { flex:0 0 84px; color:var(--dim); }
+  .row input[type=range] { flex:1; }
+  .row .val { flex:0 0 92px; text-align:right; font-variant-numeric:tabular-nums; }
+  button { background:#26314a; color:var(--fg); border:1px solid #3a4a6b; border-radius:6px;
+           padding:6px 12px; cursor:pointer; font-size:13px; }
+  button:hover { background:#31405f; }
+  button.warn { border-color:#b0563a; }
+  button:disabled { opacity:.4; cursor:default; }
+  #metrics { font-variant-numeric:tabular-nums; }
+  #metrics .mrow { display:flex; justify-content:space-between; margin:3px 0; }
+  #metrics .delta { color:var(--dim); font-size:12px; margin-left:6px; }
+  .up { color:#ff8a65; } .down { color:#7fd4a7; }
+  #log { height:150px; overflow-y:auto; font-size:12px; white-space:pre-wrap;
+         background:#0b0f16; border-radius:6px; padding:6px 8px; }
+  #status { font-weight:bold; }
+  .seg-pick { font-size:12px; color:var(--dim); }
+</style>
+</head>
+<body>
+<h1>弹性桥三车通行模拟（确定性物理 · 应力 / 共振 / 温度）</h1>
+<div id="wrap">
+  <div id="left">
+    <canvas id="cv" width="960" height="440"></canvas>
+    <div class="card" style="margin-top:10px">
+      <div class="row">
+        <button id="btnStart">开始</button>
+        <button id="btnPause" disabled>暂停</button>
+        <button id="btnStep" disabled>单步</button>
+        <button id="btnReset" class="warn">重置</button>
+        <button id="btnReplay" disabled>回放验证</button>
+        <button id="btnAudio">声音: 关</button>
+        <span id="status">就绪</span>
+      </div>
+      <div class="row seg-pick" id="segHint">加固：点击桥面两个桥段进行加固（剩余 2 次）</div>
+    </div>
+  </div>
+  <div id="side">
+    <div class="card">
+      <h2>参数（超限自动截断）</h2>
+      <div class="row"><label>车速 v</label>
+        <input id="inSpeed" type="range" min="20" max="300" value="120">
+        <span class="val" id="vSpeed"></span></div>
+      <div class="row"><label>车辆间距 d</label>
+        <input id="inGap" type="range" min="40" max="400" value="200">
+        <span class="val" id="vGap"></span></div>
+      <div class="row"><label>载重系数 m</label>
+        <input id="inLoad" type="range" min="0.5" max="3" step="0.05" value="1">
+        <span class="val" id="vLoad"></span></div>
+    </div>
+    <div class="card" id="metrics">
+      <h2>关键物理量 / 最近变化</h2>
+      <div class="mrow"><span>最大应力 σ</span><span><b id="mStress">-</b><span class="delta" id="dStress"></span></span></div>
+      <div class="mrow"><span>中心挠度 y</span><span><b id="mDefl">-</b><span class="delta" id="dDefl"></span></span></div>
+      <div class="mrow"><span>桥上载重 W</span><span><b id="mWeight">-</b><span class="delta" id="dWeight"></span></span></div>
+      <div class="mrow"><span>最高温度 T</span><span><b id="mTemp">-</b><span class="delta" id="dTemp"></span></span></div>
+      <div class="mrow"><span>激励/固有频率</span><span><b id="mFreq">-</b></span></div>
+    </div>
+    <div class="card">
+      <h2>场景验证（无头快进 · 重复一致性）</h2>
+      <div class="row">
+        <button id="btnScnNormal">正常工况</button>
+        <button id="btnScnLimit">极限载荷</button>
+        <button id="btnScnUnstable">失稳共振</button>
+      </div>
+      <div id="log"></div>
+    </div>
+  </div>
+</div>
+<script src="sim.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
