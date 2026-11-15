@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#e9e5da" />
+    <meta
+      name="description"
+      content="FIELD LINK 双人协作测绘游戏：一人布点，一人连线并标注风险。"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23171a15'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23c8f04b' stroke-width='3'/%3E%3Cpath d='M14 32h36M32 14v36' stroke='%23c8f04b' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23c8f04b'/%3E%3C/svg%3E"
+    />
+    <title>FIELD LINK · 双人协作测绘</title>
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </span>
+          <div>
+            <p class="brand-name">FIELD<span>/</span>LINK</p>
+            <p class="brand-sub">协作测绘终端 · 北岸站</p>
+          </div>
+        </div>
+
+        <div class="session-meta" aria-label="当前任务">
+          <span class="meta-label">ACTIVE SURVEY</span>
+          <strong>07 / 北岸风险复核</strong>
+          <span class="sync-state"><i></i> 双端链路同步</span>
+        </div>
+
+        <div class="top-actions">
+          <button id="soundBtn" class="icon-button" type="button" aria-label="切换音效">
+            <span class="sound-glyph" aria-hidden="true">◖))</span>
+            <span id="soundLabel">音效开</span>
+          </button>
+          <button id="pauseBtn" class="icon-button" type="button">
+            <span aria-hidden="true">Ⅱ</span> 暂停 <kbd>P</kbd>
+          </button>
+          <button id="restartBtn" class="icon-button" type="button">
+            <span aria-hidden="true">↻</span> 重开
+          </button>
+          <button id="rotateBtn" class="icon-button accent" type="button">
+            <span aria-hidden="true">⇄</span> 轮换职责
+          </button>
+          <button id="debugBtn" class="icon-button" type="button">
+            <span aria-hidden="true">⌁</span> 单人调试
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="player-column left" id="leftPlayerCard">
+          <div class="player-card" data-side="left">
+            <div class="player-card-head">
+              <span class="side-label">P1 <b>左席</b></span>
+              <span class="online-pill"><i></i> 在线</span>
+            </div>
+            <div class="role-heading">
+              <span class="role-symbol surveyor-symbol" id="leftRoleSymbol">◎</span>
+              <div>
+                <p class="eyebrow">控制职责</p>
+                <h2 id="leftRoleName">测量员</h2>
+              </div>
+            </div>
+            <p class="role-description" id="leftRoleDescription">
+              在靶区内布设四个测量点，为路线提供地理锚点。
+            </p>
+
+            <div class="personal-stat">
+              <div class="personal-stat-value">
+                <strong id="leftStatValue">0</strong><span id="leftStatTotal">/ 4</span>
+              </div>
+              <span id="leftStatLabel">测量点</span>
+            </div>
+            <div class="mini-track"><i id="leftProgressBar"></i></div>
+
+            <div class="instrument-block">
+              <div class="instrument-head">
+                <span>操作仪表</span>
+                <b id="leftInstrumentStatus">待命</b>
+              </div>
+              <div class="signal-row">
+                <span>同步信号</span>
+                <strong id="leftSignal">100%</strong>
+              </div>
+              <div class="signal-bars" id="leftSignalBars" aria-hidden="true"></div>
+            </div>
+
+            <div class="last-sync">
+              <span class="pulse-dot"></span>
+              <p id="leftLastSync">等待左席操作…</p>
+            </div>
+
+            <div class="key-guide" id="leftKeyGuide">
+              <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动</span>
+              <span><kbd>F</kbd> 执行</span>
+              <span><kbd>Z</kbd> 撤回</span>
+              <span><kbd>G</kbd> 风险</span>
+            </div>
+          </div>
+
+          <div class="side-note">
+            <span class="note-index">01</span>
+            <p>光标只影响自己的职责。另一侧已提交的标记不可被覆盖或删除。</p>
+          </div>
+        </aside>
+
+        <section class="map-column" aria-label="共享测绘地图">
+          <div class="map-heading">
+            <div>
+              <p class="eyebrow">SHARED TOPOGRAPHIC MAP / SECTOR 07</p>
+              <h1>北岸测绘区</h1>
+            </div>
+            <div class="map-meta">
+              <span>EPSG:3857</span>
+              <span>1:12,500</span>
+              <span class="live-tag"><i></i> LIVE</span>
+            </div>
+          </div>
+
+          <div class="canvas-frame" id="canvasFrame">
+            <canvas
+              id="mapCanvas"
+              tabindex="0"
+              aria-label="双人共享地图。左席使用 WASD 移动、F 执行；右席使用方向键移动、回车连线。"
+            ></canvas>
+
+            <div class="map-corner top-left">
+              <span class="corner-caption">光标地理坐标</span>
+              <b id="coordText">E 0412 / N 0618</b>
+            </div>
+
+            <div class="map-corner top-right">
+              <span class="map-status" id="mapStatus"><i></i> 两台终端在线</span>
+            </div>
+
+            <div class="map-legend" aria-label="地图图例">
+              <span><i class="legend-point"></i>测量点</span>
+              <span><i class="legend-route"></i>已连路线</span>
+              <span><i class="legend-risk"></i>风险标记</span>
+            </div>
+
+            <div class="compass" aria-hidden="true">
+              <span>N</span>
+              <i></i>
+            </div>
+
+            <div class="zoom-controls" aria-label="地图缩放">
+              <button type="button" id="zoomIn" aria-label="放大地图">+</button>
+              <span id="zoomLabel">100%</span>
+              <button type="button" id="zoomOut" aria-label="缩小地图">−</button>
+            </div>
+
+            <div class="active-hint" id="activeHint">
+              <span class="hint-role" id="hintRole">测量员</span>
+              <span id="hintText">靠近闪烁靶区，按 F 布设测量点</span>
+            </div>
+
+            <div class="toast" id="toast" role="status" aria-live="polite"></div>
+          </div>
+
+          <div class="map-footer">
+            <div class="shared-link">
+              <span class="link-node">P1</span>
+              <span class="link-line"><i id="linkPulse"></i></span>
+              <span class="link-node">P2</span>
+              <small>共享状态 · 5 ms 同步</small>
+            </div>
+            <div class="recovery-state" id="recoveryState">
+              <span><i></i> 校验稳定</span>
+              <small>最近冲突将自动写入回放</small>
+            </div>
+            <div class="zoom-readout">
+              <span>视口</span>
+              <b id="viewportReadout">1600 × 1000 m</b>
+            </div>
+          </div>
+        </section>
+
+        <aside class="mission-column">
+          <section class="panel mission-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">MISSION 07</p>
+                <h2>完成全部标注</h2>
+              </div>
+              <strong class="percent" id="taskPercent">0%</strong>
+            </div>
+            <div class="task-track"><i id="taskProgressBar"></i></div>
+            <div class="objective-list">
+              <div class="objective" id="objectivePoints">
+                <span class="objective-icon">◎</span>
+                <p><b>布设测量点</b><small>测量员 · 靶区内投放</small></p>
+                <strong id="pointsProgress">0/4</strong>
+              </div>
+              <div class="objective" id="objectiveRoutes">
+                <span class="objective-icon route-icon">⌁</span>
+                <p><b>连接主路线</b><small>制图员 · 按相邻顺序</small></p>
+                <strong id="routesProgress">0/3</strong>
+              </div>
+              <div class="objective" id="objectiveRisks">
+                <span class="objective-icon risk-icon">△</span>
+                <p><b>标注风险点</b><small>制图员 · 路线完成后</small></p>
+                <strong id="risksProgress">0/2</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel resource-panel">
+            <div class="panel-head compact">
+              <div>
+                <p class="eyebrow">SHARED RESOURCE</p>
+                <h2>团队同步信号</h2>
+              </div>
+              <span class="live-tag"><i></i> 实时</span>
+            </div>
+            <div class="resource-readout">
+              <div class="score-block">
+                <span id="scoreValue">100</span>
+                <small>评分</small>
+              </div>
+              <div class="signal-block">
+                <b id="teamSignal">100<small>%</small></b>
+                <span>剩余信号</span>
+              </div>
+            </div>
+            <div class="signal-track"><i id="teamSignalBar"></i></div>
+            <div class="resource-foot">
+              <span>重复标记 <b id="duplicateCount">0</b></span>
+              <span>冲突 <b id="conflictCount">0</b></span>
+              <span>已恢复 <b id="recoveryCount">0</b></span>
+            </div>
+          </section>
+
+          <section class="panel player-card compact" data-side="right" id="rightPlayerCard">
+            <div class="player-card-head">
+              <span class="side-label">P2 <b>右席</b></span>
+              <span class="online-pill"><i></i> 在线</span>
+            </div>
+            <div class="role-heading compact-role">
+              <span class="role-symbol cartographer-symbol" id="rightRoleSymbol">⌁</span>
+              <div>
+                <p class="eyebrow">控制职责</p>
+                <h2 id="rightRoleName">制图员</h2>
+              </div>
+              <div class="compact-stat">
+                <strong id="rightStatValue">0</strong>
+                <span id="rightStatTotal">/ 5</span>
+              </div>
+            </div>
+            <div class="mini-track"><i id="rightProgressBar"></i></div>
+            <div class="compact-instrument">
+              <span>同步信号 <b id="rightSignal">100%</b></span>
+              <span id="rightInstrumentStatus">待命</span>
+            </div>
+            <div class="last-sync slim">
+              <span class="pulse-dot"></span>
+              <p id="rightLastSync">等待右席操作…</p>
+            </div>
+            <div class="key-guide compact-guide" id="rightKeyGuide">
+              <span><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 移动</span>
+              <span><kbd>Enter</kbd> 连线</span>
+              <span><kbd>R</kbd> 风险</span>
+              <span><kbd>⌫</kbd> 撤回</span>
+            </div>
+          </section>
+
+          <section class="panel replay-panel">
+            <div class="panel-head compact">
+              <div>
+                <p class="eyebrow">SESSION TAPE</p>
+                <h2>冲突回放</h2>
+              </div>
+              <button type="button" id="openReplayBtn" class="text-button">完整回放 ↗</button>
+            </div>
+            <ul class="mini-timeline" id="miniTimeline">
+              <li class="empty-log">操作记录会在双方终端同步出现</li>
+            </ul>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="status-bar">
+        <div class="timer-block">
+          <span class="timer-label">剩余作业时间</span>
+          <strong id="countdown">02:30</strong>
+          <span class="timer-unit">MIN</span>
+        </div>
+        <div class="timer-progress"><i id="timerBar"></i></div>
+        <div class="session-info">
+          <span><i class="status-light"></i> <b id="sessionState">作业进行中</b></span>
+          <span id="roleAssignment">左席 P1 → 测量员 / 右席 P2 → 制图员</span>
+        </div>
+        <div class="status-actions">
+          <button type="button" id="helpBtn" class="status-button">操作说明</button>
+          <span class="build-label">FL–07 / BUILD 1.4</span>
+        </div>
+      </footer>
+    </div>
+
+    <div class="modal-layer" id="pauseOverlay" hidden>
+      <div class="modal-card pause-card" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+        <p class="eyebrow">LINK SUSPENDED</p>
+        <h2 id="pauseTitle">作业已暂停</h2>
+        <p>计时与同步信号已冻结。双方光标和全部标注保持不变。</p>
+        <div class="modal-actions">
+          <button type="button" id="resumeBtn" class="primary-button">继续作业</button>
+          <button type="button" id="pauseRestartBtn" class="secondary-button">重新开始</button>
+          <button type="button" id="pauseReplayBtn" class="secondary-button">查看回放</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-layer" id="resultOverlay" hidden>
+      <div class="modal-card result-card" id="resultCard" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+        <div class="result-mark" id="resultMark">✓</div>
+        <p class="eyebrow" id="resultEyebrow">SURVEY COMPLETE</p>
+        <h2 id="resultTitle">全部标注完成</h2>
+        <p id="resultReason">两侧职责均已提交，北岸测绘链路保持完整。</p>
+        <div class="result-stats">
+          <div><span>最终评分</span><strong id="resultScore">100</strong></div>
+          <div><span>用时</span><strong id="resultTime">00:00</strong></div>
+          <div><span>冲突 / 恢复</span><strong id="resultConflicts">0 / 0</strong></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="resultRestartBtn" class="primary-button">相同配置再来一次</button>
+          <button type="button" id="resultRotateBtn" class="secondary-button">轮换职责再试</button>
+          <button type="button" id="resultReplayBtn" class="secondary-button">查看完整回放</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-layer" id="replayOverlay" hidden>
+      <div class="modal-card replay-card wide" role="dialog" aria-modal="true" aria-labelledby="replayTitle">
+        <div class="replay-head">
+          <div>
+            <p class="eyebrow">SESSION REPLAY / FORENSIC LOG</p>
+            <h2 id="replayTitle">完整协作回放</h2>
+          </div>
+          <button type="button" class="modal-close" id="closeReplayBtn" aria-label="关闭回放">×</button>
+        </div>
+        <div class="replay-summary">
+          <div><span>记录状态</span><b id="replayStatus">进行中</b></div>
+          <div><span>职责配置</span><b id="replayRoles">默认配置</b></div>
+          <div><span>冲突时刻</span><b id="replayConflictCount">0 条</b></div>
+          <div><span>总事件</span><b id="replayEventCount">0</b></div>
+        </div>
+        <div class="replay-body">
+          <div class="conflict-index">
+            <h3>冲突索引</h3>
+            <ul id="conflictIndex"><li class="empty-log">暂无冲突</li></ul>
+          </div>
+          <div class="event-tape">
+            <h3>事件磁带</h3>
+            <ol id="replayEvents"></ol>
+          </div>
+        </div>
+        <div class="replay-foot">
+          <span>时间码从本轮开始计时，精确到 0.1 秒。</span>
+          <button type="button" id="replayCloseFootBtn" class="primary-button">返回作业</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-layer" id="helpOverlay" hidden>
+      <div class="modal-card help-card wide" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+        <div class="replay-head">
+          <div>
+            <p class="eyebrow">FIELD MANUAL / 双人操作</p>
+            <h2 id="helpTitle">协作规则</h2>
+          </div>
+          <button type="button" class="modal-close" id="closeHelpBtn" aria-label="关闭说明">×</button>
+        </div>
+        <div class="help-grid">
+          <article>
+            <span class="help-number">01</span>
+            <h3>左席 · 测量员</h3>
+            <p><kbd>W A S D</kbd> 移动绿色光标，靠近闪烁靶区后按 <kbd>F</kbd> 布点。<kbd>Z</kbd> 仅能撤回自己尚未被连接的最后一个点。</p>
+          </article>
+          <article>
+            <span class="help-number">02</span>
+            <h3>右席 · 制图员</h3>
+            <p><kbd>↑ ↓ ← →</kbd> 移动青色光标，在测量点旁按 <kbd>Enter</kbd> 选点/连线；路线完成后靠近橙色风险区按 <kbd>R</kbd> 标注。</p>
+          </article>
+          <article>
+            <span class="help-number">03</span>
+            <h3>轮换与调试</h3>
+            <p>“轮换职责”会让两个键位控制侧交换角色，并重新开始任务。“单人调试”中按 <kbd>Tab</kbd> 切换当前控制职责，由一人完成双角色验证。</p>
+          </article>
+          <article>
+            <span class="help-number">04</span>
+            <h3>冲突与恢复</h3>
+            <p>重复路线会扣分并写入回放。错误动作会进入恢复状态，下一次有效操作将完成恢复。任何一侧只能撤回自己的动作。</p>
+          </article>
+        </div>
+        <div class="help-foot">
+          <span><kbd>P</kbd> 暂停 / 继续</span>
+          <span><kbd>Wheel</kbd> 地图缩放，标记始终绑定地理坐标</span>
+          <button type="button" id="helpCloseFootBtn" class="primary-button">开始测绘</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sr-only" id="announcer" aria-live="assertive"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
