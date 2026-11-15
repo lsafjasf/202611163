@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="六条线路到站间隔时空图与数据质量分析" />
+    <title>六线到站间隔时空图</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23121f39'/%3E%3Cpath d='M7 10h18M7 16h12M7 22h18' stroke='%237aa3ff' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="preload" href="./assets/NotoSansSC-Subset.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-glow page-glow-a"></div>
+    <div class="page-glow page-glow-b"></div>
+    <div class="app-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="live-dot"></span>城市公共交通 · 运营诊断</div>
+          <h1>六线到站<span>间隔时空图</span></h1>
+          <p class="hero-subtitle">从原始到站记录重算间隔，识别缺失、重复与异常，快速定位早高峰运行波动。</p>
+          <div class="hero-meta">
+            <span>样本日期 <strong id="heroDate">2026-11-16</strong></span>
+            <span class="meta-divider"></span>
+            <span>时区 <strong>UTC+8</strong></span>
+            <span class="meta-divider"></span>
+            <span>数据版本 <strong id="heroVersion">—</strong></span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <div class="version-panel">
+            <span class="version-label">当前数据版本</span>
+            <strong id="versionLabel">—</strong>
+            <span id="datasetNote">内置样例 · 可完整复算</span>
+          </div>
+          <button class="export-button" id="exportButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3" />
+            </svg>
+            导出当前窗口 PNG
+          </button>
+        </div>
+      </header>
+
+      <section class="filter-card" aria-label="筛选条件">
+        <div class="filter-block line-filter-block">
+          <div class="filter-heading">
+            <span class="filter-index">01</span>
+            <div>
+              <strong>线路筛选</strong>
+              <span>多选线路，图例与均值同步</span>
+            </div>
+          </div>
+          <div class="line-filter-list" id="lineFilters"></div>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="filter-block window-filter-block">
+          <div class="filter-heading">
+            <span class="filter-index">02</span>
+            <div>
+              <strong>时间窗口</strong>
+              <span>切换窗口会记住上次选中间隔</span>
+            </div>
+          </div>
+          <div class="window-controls">
+            <div class="window-presets" id="windowPresets"></div>
+            <div class="zoom-controls" aria-label="缩放当前时间窗口">
+              <button type="button" id="zoomOut" title="缩短 30 分钟窗口">−</button>
+              <span>缩放</span>
+              <button type="button" id="zoomIn" title="扩展 30 分钟窗口">＋</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="context-strip">
+        <div class="context-item">
+          <span>当前线路</span>
+          <strong id="currentFilterLine">—</strong>
+        </div>
+        <div class="context-item">
+          <span>当前窗口</span>
+          <strong id="currentFilterWindow">—</strong>
+        </div>
+        <div class="context-item">
+          <span>原始记录范围</span>
+          <strong id="currentFilterSource">—</strong>
+        </div>
+        <div class="context-item context-version">
+          <span>版本</span>
+          <strong id="currentFilterVersion">—</strong>
+        </div>
+      </div>
+
+      <main class="workspace">
+        <div class="main-column">
+          <section class="chart-card panel">
+            <div class="panel-header chart-header">
+              <div>
+                <div class="panel-kicker">HEADWAY SPACE–TIME</div>
+                <h2>到站间隔时空图</h2>
+                <p>横轴为到站时刻，纵轴为线路；色带长度即相邻班次的实际到站间隔。</p>
+              </div>
+              <div class="chart-badges">
+                <span class="status-badge status-ok" id="chartQualityBadge">—</span>
+                <span class="status-badge status-neutral" id="chartSampleBadge">—</span>
+              </div>
+            </div>
+            <div class="legend-wrap">
+              <div class="legend-list" id="legend"></div>
+              <div class="legend-note">图例数值为当前窗口内有效间隔均值</div>
+            </div>
+            <div class="chart-stage" id="chartStage">
+              <canvas id="chartCanvas" role="img" aria-label="六条线路到站间隔时空图"></canvas>
+              <div class="chart-tooltip" id="chartTooltip" role="status"></div>
+              <div class="chart-empty" id="chartEmpty" hidden>当前筛选下没有可绘制的间隔</div>
+            </div>
+            <div class="chart-footer">
+              <div class="chart-hint">
+                <span class="hint-icon">↖</span>
+                点击任一经纬色带查看原始记录；点击表格行也可定位
+              </div>
+              <div class="chart-method-inline">
+                异常阈值 <strong>&lt; 6.0 分 / &gt; 20.0 分</strong>
+                <span>·</span>
+                缺失段不计入均值
+              </div>
+            </div>
+          </section>
+
+          <section class="raw-panel panel" id="rawPanel">
+            <div class="panel-header compact-header">
+              <div>
+                <div class="panel-kicker">SOURCE RECORDS</div>
+                <h2>原始记录</h2>
+              </div>
+              <span class="selection-pill" id="selectionPill">未选择间隔</span>
+            </div>
+            <div class="raw-placeholder" id="rawPlaceholder">
+              <div class="placeholder-mark">
+                <span></span><span></span><span></span>
+              </div>
+              <div>
+                <strong>点击图中的间隔色带</strong>
+                <p>这里会展开该间隔两端的原始到站记录，并标出重复记录与缺失班次。</p>
+              </div>
+            </div>
+            <div class="raw-content" id="rawContent" hidden>
+              <div class="selection-summary" id="selectionSummary"></div>
+              <div class="table-scroll raw-table-scroll">
+                <table class="data-table raw-table">
+                  <thead>
+                    <tr>
+                      <th>记录 ID</th>
+                      <th>班次</th>
+                      <th>计划到站</th>
+                      <th>实际到站</th>
+                      <th>偏差</th>
+                      <th>车辆</th>
+                      <th>处置</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rawTableBody"></tbody>
+                </table>
+              </div>
+              <div class="raw-missing-note" id="rawMissingNote" hidden></div>
+            </div>
+          </section>
+
+          <section class="interval-panel panel">
+            <div class="panel-header compact-header">
+              <div>
+                <div class="panel-kicker">INTERVAL DETAIL</div>
+                <h2>间隔明细</h2>
+              </div>
+              <div class="table-actions">
+                <span class="count-badge" id="intervalCount">0 段</span>
+                <button type="button" class="text-button" id="clearSelection" hidden>取消选择</button>
+              </div>
+            </div>
+            <div class="table-scroll interval-table-scroll">
+              <table class="data-table interval-table">
+                <thead>
+                  <tr>
+                    <th>线路</th>
+                    <th>到站区间</th>
+                    <th>间隔</th>
+                    <th>计划差</th>
+                    <th>数据状态</th>
+                    <th>原始行</th>
+                  </tr>
+                </thead>
+                <tbody id="intervalTableBody"></tbody>
+              </table>
+              <div class="table-empty" id="intervalTableEmpty" hidden>
+                当前线路与时间窗口内没有间隔记录。
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="side-column">
+          <section class="quality-panel panel">
+            <div class="panel-header compact-header">
+              <div>
+                <div class="panel-kicker">DATA QUALITY</div>
+                <h2>数据质量摘要</h2>
+              </div>
+              <span class="scope-tag">当前筛选</span>
+            </div>
+            <div class="completeness-row">
+              <div class="completeness-ring" id="completenessRing">
+                <div><strong id="completenessValue">—</strong><span>完整率</span></div>
+              </div>
+              <div class="completeness-copy">
+                <strong id="canonicalSummary">—</strong>
+                <p>计划班次中已去重匹配的到站记录</p>
+              </div>
+            </div>
+            <div class="quality-grid">
+              <div class="quality-metric">
+                <span class="quality-icon dedupe-icon">×</span>
+                <div><span>去重</span><strong id="dedupeCount">—</strong></div>
+              </div>
+              <div class="quality-metric">
+                <span class="quality-icon missing-icon">!</span>
+                <div><span>缺失</span><strong id="missingCount">—</strong></div>
+              </div>
+              <div class="quality-metric">
+                <span class="quality-icon anomaly-icon">△</span>
+                <div><span>异常</span><strong id="anomalyCount">—</strong></div>
+              </div>
+            </div>
+            <div class="quality-list">
+              <div><span>原始记录</span><strong id="rawRecordCount">—</strong></div>
+              <div><span>去重后班次</span><strong id="uniqueRecordCount">—</strong></div>
+              <div><span>计划班次</span><strong id="expectedCount">—</strong></div>
+              <div><span>有效间隔段</span><strong id="validIntervalCount">—</strong></div>
+            </div>
+            <div class="quality-note">
+              <span class="quality-note-dot"></span>
+              缺失与异常分列统计；图中虚线、斜纹和琥珀标记均可定位。
+            </div>
+          </section>
+
+          <section class="method-panel panel">
+            <div class="panel-header compact-header">
+              <div>
+                <div class="panel-kicker">CALCULATION</div>
+                <h2>统计口径</h2>
+              </div>
+              <span class="formula-tag">可复算</span>
+            </div>
+            <div class="headline-stat">
+              <span>当前窗口平均间隔</span>
+              <strong id="averageHeadway">—</strong>
+              <small id="averageScope">—</small>
+            </div>
+            <dl class="method-list">
+              <div><dt>中位间隔</dt><dd id="medianHeadway">—</dd></div>
+              <div><dt>平均值公式</dt><dd id="averageFormula">—</dd></div>
+              <div><dt>窗口归属</dt><dd>按间隔中点归入窗口</dd></div>
+              <div><dt>异常定义</dt><dd>&lt; 6.0 分 或 &gt; 20.0 分</dd></div>
+              <div><dt>缺失处理</dt><dd>保留跨度，标出缺失，不纳入均值</dd></div>
+              <div><dt>重复处理</dt><dd>保留最早接收记录，余量去重</dd></div>
+            </dl>
+            <div class="version-block">
+              <span>数据版本</span>
+              <strong id="versionBlockValue">—</strong>
+              <p>所有数值由内置原始样例的到站时间实时重算；界面无预置统计结果。</p>
+            </div>
+          </section>
+
+          <section class="fixture-panel panel">
+            <div class="panel-header compact-header">
+              <div>
+                <div class="panel-kicker">SAMPLE COVERAGE</div>
+                <h2>样例覆盖</h2>
+              </div>
+            </div>
+            <div class="fixture-list" id="fixtureList"></div>
+            <p class="fixture-footnote">内置三组边界样例用于验证清洗、聚合与导出一致性。</p>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="page-footer">
+        <span>六线到站间隔分析 · 内置样例</span>
+        <span id="footerVersion">—</span>
+      </footer>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>
