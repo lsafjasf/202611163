@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%234a90d9'/%3E%3C/svg%3E" />
+  <title>地震波形与震源扩散圈同步回放</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-block">
+      <h1>三台站地震波形同步回放</h1>
+      <div id="meta-line" class="meta-line"></div>
+    </div>
+    <div class="dataset-switch">
+      <label>数据集：</label>
+      <button data-dataset="normal" class="ds-btn">正常组</button>
+      <button data-dataset="missing" class="ds-btn">缺失组</button>
+      <button data-dataset="duplicate" class="ds-btn">重复组</button>
+    </div>
+  </header>
+
+  <section class="filters panel">
+    <div class="filter-group">
+      <span class="filter-label">台站筛选：</span>
+      <label><input type="checkbox" class="station-chk" value="STA_A" checked /> STA_A</label>
+      <label><input type="checkbox" class="station-chk" value="STA_B" checked /> STA_B</label>
+      <label><input type="checkbox" class="station-chk" value="STA_C" checked /> STA_C</label>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">质量筛选：</span>
+      <select id="quality-filter">
+        <option value="all">全部分箱</option>
+        <option value="missing">仅含缺失分箱</option>
+        <option value="anomaly">仅含异常分箱</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">时间窗口：</span>
+      <div id="window-switch" class="window-switch"></div>
+    </div>
+    <div id="active-filter-text" class="active-filter-text"></div>
+  </section>
+
+  <main class="layout">
+    <section class="panel map-panel">
+      <h2>震源扩散圈地图</h2>
+      <canvas id="map-canvas" width="560" height="460"></canvas>
+    </section>
+
+    <section class="panel wave-panel">
+      <h2>波形（点击波形标记/取消到达时间）</h2>
+      <canvas id="wave-canvas" width="720" height="460"></canvas>
+    </section>
+  </main>
+
+  <section class="panel timeline-panel">
+    <h2>时间轴（可拖动定位，标记同步显示）</h2>
+    <canvas id="timeline-canvas" width="1320" height="90"></canvas>
+  </section>
+
+  <section class="panel controls-panel">
+    <button id="play-btn">▶ 播放</button>
+    <label>速度
+      <select id="speed-select">
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
+        <option value="4">4×</option>
+      </select>
+    </label>
+    <label><input type="checkbox" id="audio-toggle" checked /> 低频提示音</label>
+    <span id="time-readout" class="time-readout"></span>
+    <span class="spacer"></span>
+    <button id="export-frame-btn">导出当前帧 PNG</button>
+    <button id="export-csv-btn">导出筛选数据 CSV</button>
+  </section>
+
+  <section class="panel quality-panel">
+    <h2>数据质量摘要（由当前数据集原始样例实时重算）</h2>
+    <table id="quality-table">
+      <thead>
+        <tr>
+          <th>台站</th><th>原始行数</th><th>去重删除</th><th>缺失样例</th>
+          <th>缺失分箱(1s)</th><th>异常样例</th><th>清洗后行数</th><th>分箱数</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p id="caliber-text" class="caliber-text"></p>
+  </section>
+
+  <section class="panel table-panel">
+    <h2>清洗聚合明细（1 秒分箱，随筛选与时间窗口联动）</h2>
+    <div class="table-wrap">
+      <table id="bin-table">
+        <thead>
+          <tr>
+            <th>台站</th><th>分箱起始(s)</th><th>样例数</th><th>均值</th>
+            <th>最小值</th><th>最大值</th><th>RMS</th><th>缺失</th><th>异常</th><th>质量标记</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

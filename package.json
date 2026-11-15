@@ -1,0 +1,27 @@
+{
+  "name": "seismic-sync-playback",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "三台站地震波形与震源扩散圈同步回放（Canvas + Web Audio）",
+  "scripts": {
+    "test": "node tests/run-tests.js",
+    "test:e2e": "node tests/e2e.mjs",
+    "start": "python3 -m http.server 8080"
+  },
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/202611163.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/202611163/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/202611163#readme"
+}
