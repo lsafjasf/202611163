@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "playwright test",
+    "check": "node --check src/engine.js && node --check src/audio.js && node --check src/renderer.js && node --check src/game.js"
+  },
+  "name": "canyon-relay",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module"
+}

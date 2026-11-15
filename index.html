@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="深谷摆渡：两名玩家各守一侧，用弹性救援索把物资箱送到峡谷中央平台。"
+    />
+    <title>深谷摆渡 · Canyon Relay</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23091416'/%3E%3Cpath d='M12 42h40M18 42V25m14 17V16m14 26V30' stroke='%236fe4d0' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div>
+            <p class="eyebrow">CANYON RELAY / 07</p>
+            <h1>深谷摆渡</h1>
+          </div>
+        </div>
+
+        <div class="mission-id">
+          <span class="signal-dot"></span>
+          <span>中央中继台</span>
+          <strong>物资投送</strong>
+        </div>
+
+        <nav class="top-actions" aria-label="游戏操作">
+          <button id="soloBtn" class="tool-button" type="button" title="单人调试模式（F2）">
+            <span class="button-icon">◇</span><span>单人调试</span>
+          </button>
+          <button id="swapBtn" class="tool-button" type="button" title="轮换两名玩家的岸位">
+            <span class="button-icon">⇄</span><span>轮换岸位</span>
+          </button>
+          <button id="pauseBtn" class="tool-button" type="button" title="暂停（Esc）">
+            <span class="button-icon">Ⅱ</span><span>暂停</span>
+          </button>
+          <button id="restartBtn" class="tool-button tool-button--restart" type="button" title="重新开始（N）">
+            <span class="button-icon">↻</span><span>重开</span>
+          </button>
+          <button id="replayBtn" class="tool-button" type="button">
+            <span class="button-icon">▤</span><span>回放</span>
+          </button>
+          <button id="soundBtn" class="icon-button" type="button" aria-label="切换声音">
+            <span id="soundIcon">◖</span>
+          </button>
+        </nav>
+      </header>
+
+      <main class="workspace">
+        <aside class="player-panel" id="leftPanel" data-station="left" aria-live="polite">
+          <div class="player-head">
+            <div class="player-identity">
+              <span class="player-chip" data-bind="playerTag">P1</span>
+              <div>
+                <p class="micro-label" data-bind="station">左岸 · WEST RIM</p>
+                <h2 data-bind="playerName">收索手</h2>
+              </div>
+            </div>
+            <span class="status-pill status-pill--good" data-bind="playerStatus">连接中</span>
+          </div>
+
+          <div class="role-note" data-bind="roleNote">控制主索：收放张力，把箱子送往中央。</div>
+
+          <div class="gauge-block">
+            <div class="gauge-heading">
+              <span data-bind="gaugeLabel">主索张力</span>
+              <strong data-bind="gaugeValue">0<small>%</small></strong>
+            </div>
+            <div class="gauge-ring" data-bind="gaugeRing">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="gauge-track" cx="60" cy="60" r="50"></circle>
+                <circle class="gauge-fill" cx="60" cy="60" r="50"></circle>
+                <circle class="gauge-danger" cx="60" cy="60" r="50"></circle>
+              </svg>
+              <div class="gauge-center">
+                <span data-bind="gaugeCaption">松弛</span>
+                <strong data-bind="gaugeBig">0</strong>
+                <small>张力</small>
+              </div>
+            </div>
+            <div class="gauge-legend">
+              <span><i class="dot dot--slack"></i>12 松弛</span>
+              <span><i class="dot dot--safe"></i>38–78 稳定</span>
+              <span><i class="dot dot--danger"></i>90+ 断裂</span>
+            </div>
+          </div>
+
+          <div class="metric-list">
+            <div class="metric-row">
+              <span>落点误差</span>
+              <strong data-bind="mirrorError">—</strong>
+            </div>
+            <div class="metric-row">
+              <span>共享进度</span>
+              <strong data-bind="mirrorProgress">0%</strong>
+            </div>
+            <div class="metric-row">
+              <span>索具完整度</span>
+              <strong data-bind="mirrorRope">100%</strong>
+            </div>
+          </div>
+
+          <div class="key-cluster" data-bind="keyCluster">
+            <div><kbd>W</kbd><span>收索</span></div>
+            <div><kbd>S</kbd><span>放索</span></div>
+            <div><kbd>R</kbd><span>回收</span></div>
+          </div>
+        </aside>
+
+        <section class="stage-card">
+          <div class="stage-heading">
+            <div>
+              <p class="eyebrow">LIVE CANYON FEED</p>
+              <h2>中央投送窗口 <span id="roundBadge">ROUND 01</span></h2>
+            </div>
+            <div class="stage-status">
+              <span class="wind-readout">侧风 <strong id="windValue">0.0</strong> m/s</span>
+              <span class="stage-state" id="stageState">待命</span>
+            </div>
+          </div>
+
+          <div class="canvas-frame" id="canvasFrame">
+            <canvas id="gameCanvas" width="1200" height="620" aria-label="峡谷绳索运送场景"></canvas>
+
+            <div class="scanlines" aria-hidden="true"></div>
+            <div class="corner corner--tl" aria-hidden="true"></div>
+            <div class="corner corner--tr" aria-hidden="true"></div>
+            <div class="corner corner--bl" aria-hidden="true"></div>
+            <div class="corner corner--br" aria-hidden="true"></div>
+
+            <div class="canvas-topline">
+              <span><i class="live-dot"></i>模拟链路在线</span>
+              <span id="soloBadge" class="solo-badge" hidden>单人调试 · 不计正式记录</span>
+              <span id="sideSwapBadge" class="swap-badge" hidden>岸位已轮换</span>
+            </div>
+
+            <div class="task-ribbon">
+              <div class="ribbon-item" id="stepSend">
+                <span>01</span><strong>送箱</strong><small>越过峡谷</small>
+              </div>
+              <div class="ribbon-line"></div>
+              <div class="ribbon-item" id="stepLand">
+                <span>02</span><strong>落位</strong><small>对正平台</small>
+              </div>
+              <div class="ribbon-line"></div>
+              <div class="ribbon-item" id="stepRetrieve">
+                <span>03</span><strong>收索</strong><small>双方回收</small>
+              </div>
+            </div>
+
+            <div class="event-feed" id="eventFeed">
+              <span class="event-feed__time">00:00</span>
+              <span class="event-feed__label">系统自检完成，等待双人接管</span>
+            </div>
+
+            <div class="warning-banner" id="warningBanner" hidden>
+              <span class="warning-icon">!</span>
+              <span id="warningText">主索张力过高</span>
+            </div>
+
+            <div class="toast" id="toast" role="status" hidden></div>
+
+            <div class="stage-overlay" id="startOverlay">
+              <div class="overlay-card overlay-card--intro">
+                <p class="eyebrow">TWO-PERSON RESCUE PROTOCOL</p>
+                <h2>两侧同时在线，<br />才能把箱子送回家。</h2>
+                <p class="overlay-copy">
+                  左岸收放主索，右岸修正落点。保持张力稳定，抵消峡谷侧风；
+                  箱子落稳后，<strong>双方同时按住回收键</strong>。
+                </p>
+                <div class="overlay-controls">
+                  <span><kbd>W</kbd><kbd>S</kbd> 左岸张力</span>
+                  <span><kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> 右岸落点</span>
+                  <span><kbd>R</kbd> + <kbd>P</kbd> 同步回收</span>
+                </div>
+                <button class="primary-button" id="startBtn" type="button">
+                  <span>开始协作</span><span class="button-arrow">→</span>
+                </button>
+                <p class="overlay-footnote">按 Enter 开始 · Esc 暂停 · N 重开</p>
+              </div>
+            </div>
+
+            <div class="stage-overlay" id="pauseOverlay" hidden>
+              <div class="overlay-card overlay-card--compact">
+                <p class="eyebrow">SIGNAL HELD</p>
+                <h2>任务已暂停</h2>
+                <p class="overlay-copy">计时、物理与声场已冻结。两侧仪表保留当前读数。</p>
+                <div class="overlay-button-row">
+                  <button class="primary-button" id="resumeBtn" type="button">继续任务</button>
+                  <button class="secondary-button" id="pauseRestartBtn" type="button">重新开始</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="stage-overlay" id="resultOverlay" hidden>
+              <div class="overlay-card overlay-card--result">
+                <div class="result-icon" id="resultIcon">✓</div>
+                <p class="eyebrow" id="resultEyebrow">MISSION COMPLETE</p>
+                <h2 id="resultTitle">物资已送达</h2>
+                <p class="overlay-copy" id="resultCopy">双人回收完成，中央中继台恢复供能。</p>
+                <div class="result-stats">
+                  <div><span>用时</span><strong id="resultTime">00:00</strong></div>
+                  <div><span>峰值张力</span><strong id="resultTension">0%</strong></div>
+                  <div><span>冲突</span><strong id="resultConflicts">0</strong></div>
+                </div>
+                <div class="overlay-button-row">
+                  <button class="primary-button" id="resultRestartBtn" type="button">再来一次</button>
+                  <button class="secondary-button" id="resultReplayBtn" type="button">查看回放</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="objective-bar">
+            <span class="objective-tag">当前目标</span>
+            <strong id="objectiveText">等待双人接管 · 按 Enter 开始</strong>
+            <span class="objective-hint" id="objectiveHint">两侧输入互不锁定，可同时操作</span>
+          </div>
+        </section>
+
+        <aside class="player-panel" id="rightPanel" data-station="right" aria-live="polite">
+          <div class="player-head">
+            <div class="player-identity">
+              <span class="player-chip" data-bind="playerTag">P2</span>
+              <div>
+                <p class="micro-label" data-bind="station">右岸 · EAST RIM</p>
+                <h2 data-bind="playerName">引导手</h2>
+              </div>
+            </div>
+            <span class="status-pill status-pill--good" data-bind="playerStatus">连接中</span>
+          </div>
+
+          <div class="role-note" data-bind="roleNote">控制引导索：移动落点，抵消侧风与横向漂移。</div>
+
+          <div class="gauge-block gauge-block--align">
+            <div class="gauge-heading">
+              <span data-bind="gaugeLabel">落点偏差</span>
+              <strong data-bind="gaugeValue">0.0<small>m</small></strong>
+            </div>
+            <div class="alignment-scope" data-bind="alignmentScope">
+              <div class="scope-grid"></div>
+              <div class="scope-platform"></div>
+              <div class="scope-target" data-bind="scopeTarget"></div>
+              <div class="scope-cargo" data-bind="scopeCargo"></div>
+              <span class="scope-label">中央平台</span>
+            </div>
+            <div class="alignment-meter">
+              <span>偏移</span>
+              <div class="alignment-track">
+                <i class="alignment-center"></i>
+                <b data-bind="alignmentNeedle"></b>
+              </div>
+              <span>另一侧张力 <strong data-bind="mirrorTension">0%</strong></span>
+            </div>
+          </div>
+
+          <div class="metric-list">
+            <div class="metric-row">
+              <span>主索张力</span>
+              <strong data-bind="mirrorTensionRow">0%</strong>
+            </div>
+            <div class="metric-row">
+              <span>共享进度</span>
+              <strong data-bind="mirrorProgress">0%</strong>
+            </div>
+            <div class="metric-row">
+              <span>货箱完整度</span>
+              <strong data-bind="mirrorCargo">100%</strong>
+            </div>
+          </div>
+
+          <div class="key-cluster" data-bind="keyCluster">
+            <div><kbd>←</kbd><kbd>→</kbd><span>横向落点</span></div>
+            <div><kbd>↑</kbd><kbd>↓</kbd><span>纵向落点</span></div>
+            <div><kbd>P</kbd><span>回收</span></div>
+          </div>
+        </aside>
+      </main>
+
+      <footer class="shared-dock">
+        <div class="shared-title">
+          <span class="link-orb"></span>
+          <div><p class="micro-label">SYNCED SHARED STATE</p><strong>共享任务状态</strong></div>
+        </div>
+        <div class="shared-meter">
+          <div class="shared-meter__head"><span>绳索完整度</span><strong id="ropeIntegrity">100%</strong></div>
+          <div class="shared-track"><i id="ropeTrack"></i></div>
+        </div>
+        <div class="shared-meter">
+          <div class="shared-meter__head"><span>货箱完整度</span><strong id="cargoIntegrity">100%</strong></div>
+          <div class="shared-track shared-track--warm"><i id="cargoTrack"></i></div>
+        </div>
+        <div class="shared-meter shared-meter--progress">
+          <div class="shared-meter__head"><span>任务进度</span><strong id="taskProgress">0%</strong></div>
+          <div class="shared-track shared-track--cyan"><i id="progressTrack"></i></div>
+        </div>
+        <div class="timer-box">
+          <p class="micro-label">TRANSFER WINDOW</p>
+          <strong id="timer">01:15</strong>
+          <span>剩余时间</span>
+        </div>
+      </footer>
+
+      <footer class="help-strip">
+        <span><kbd>W</kbd><kbd>S</kbd> 收 / 放主索</span>
+        <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> 调整落点</span>
+        <span><kbd>R</kbd> + <kbd>P</kbd> 双方回收</span>
+        <span><kbd>Esc</kbd> 暂停</span>
+        <span><kbd>N</kbd> 重开</span>
+        <span><kbd>F2</kbd> 单人调试</span>
+        <strong>目标：稳定张力 · 精准落位 · 双人收索</strong>
+      </footer>
+    </div>
+
+    <dialog class="replay-dialog" id="replayDialog">
+      <div class="replay-shell">
+        <header class="replay-head">
+          <div>
+            <p class="eyebrow">MISSION ARCHIVE / SESSION TRACE</p>
+            <h2>任务回放</h2>
+          </div>
+          <button class="icon-button" id="closeReplayBtn" type="button" aria-label="关闭回放">×</button>
+        </header>
+        <div class="replay-body">
+          <aside class="replay-list-wrap">
+            <div class="replay-list-head">
+              <span>已保存记录</span>
+              <button id="exportReplayBtn" class="text-button" type="button">导出 JSON</button>
+            </div>
+            <div class="replay-list" id="replayList"></div>
+          </aside>
+          <section class="replay-player-wrap">
+            <div class="replay-canvas-wrap">
+              <canvas id="replayCanvas" width="1200" height="620"></canvas>
+              <span class="replay-timecode" id="replayTimecode">00:00.0</span>
+            </div>
+            <div class="timeline-wrap">
+              <input id="replayScrubber" type="range" min="0" max="1000" value="0" aria-label="回放时间轴" />
+              <div class="timeline-markers" id="timelineMarkers"></div>
+            </div>
+            <div class="replay-controls">
+              <button id="replayPlayBtn" class="primary-button primary-button--small" type="button">播放</button>
+              <span id="replayStatus">选择一条完整记录查看冲突时刻</span>
+              <span class="replay-speed">1×</span>
+            </div>
+            <div class="conflict-log">
+              <div class="conflict-log__head"><span>冲突 / 事件时刻</span><span id="conflictCount">0 条</span></div>
+              <div class="conflict-list" id="conflictList"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </dialog>
+
+    <script type="module" src="src/game.js"></script>
+  </body>
+</html>
