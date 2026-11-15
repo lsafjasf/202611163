@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171517">
+  <title>印刻 · 图章工作室</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-seal" aria-hidden="true">印</div>
+        <div>
+          <div class="brand-title">印刻 <span>SEAL ATELIER</span></div>
+          <div class="brand-subtitle">矢量印章设计台</div>
+        </div>
+      </div>
+      <div class="project-chip">
+        <span class="status-dot"></span>
+        <span id="doc-name">匠心传承</span>
+        <span id="save-status" class="save-status">正在恢复…</span>
+      </div>
+      <div class="top-actions">
+        <div class="undo-group">
+          <button id="undo-btn" class="icon-btn" aria-label="撤销" title="撤销 (Ctrl/Cmd + Z)" disabled>↶</button>
+          <button id="redo-btn" class="icon-btn" aria-label="重做" title="重做 (Ctrl/Cmd + Shift + Z)" disabled>↷</button>
+        </div>
+        <button id="qc-btn" class="button button-ghost">质检</button>
+        <button id="save-btn" class="button button-ghost">保存</button>
+        <button id="reload-btn" class="button button-ghost">重新载入</button>
+        <button id="export-btn" class="button button-primary">导出 <span>↗</span></button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar left-sidebar">
+        <section class="panel-section">
+          <div class="section-title"><span>模板</span><span class="section-count" id="template-count">2</span></div>
+          <div id="template-list" class="template-list"></div>
+          <button id="save-template-btn" class="text-button">＋ 将当前设计存为模板</button>
+        </section>
+        <section class="panel-section layers-section">
+          <div class="section-title"><span>图层</span><button id="add-image-btn" class="mini-button">＋ 图片</button></div>
+          <input id="image-input" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          <div id="layer-list" class="layer-list"></div>
+        </section>
+        <section class="panel-section keyframes-section">
+          <div class="section-title"><span>关键帧</span><span id="keyframe-count" class="section-count">0</span></div>
+          <div id="keyframe-list" class="keyframe-list">
+            <div class="empty-state">保存一组参数，随时无损回到此刻。</div>
+          </div>
+          <button id="capture-keyframe-btn" class="text-button">＋ 记录当前关键帧</button>
+        </section>
+      </aside>
+
+      <section class="stage-column">
+        <div class="stage-toolbar">
+          <div class="tool-group">
+            <button id="zoom-out-btn" class="icon-btn" title="缩小">−</button>
+            <button id="zoom-fit-btn" class="zoom-value" title="适应窗口">100%</button>
+            <button id="zoom-in-btn" class="icon-btn" title="放大">＋</button>
+          </div>
+          <div class="tool-divider"></div>
+          <button id="guides-btn" class="tool-toggle is-active" aria-pressed="true">安全区</button>
+          <button id="grid-btn" class="tool-toggle is-active" aria-pressed="true">网点纸</button>
+          <span class="stage-hint">滚轮缩放 · 空白处拖动画布</span>
+          <button id="download-json-btn" class="toolbar-text-button" title="导出可继续编辑的项目文件">项目文件 ↓</button>
+        </div>
+        <div id="stage-wrap" class="stage-wrap">
+          <div class="stage-corner top-left">LIVE CANVAS</div>
+          <canvas id="preview-canvas" aria-label="图章编辑画布"></canvas>
+          <div id="selection-pill" class="selection-pill" hidden></div>
+          <div id="canvas-empty" class="canvas-empty" hidden>
+            <strong>当前画布没有可见元素</strong>
+            <span>从左侧模板开始，或重新开启一个图层。</span>
+          </div>
+        </div>
+        <div class="stage-footer">
+          <div class="legend"><span class="legend-dot safe"></span>安全边界 <span id="safe-size-label">36 px</span></div>
+          <div class="legend"><span class="legend-dot danger"></span>不可裁切区域</div>
+          <div class="stage-resolution"><span id="size-label">720 × 720 px</span><span>透明底</span></div>
+        </div>
+      </section>
+
+      <aside class="sidebar inspector">
+        <div class="inspector-header">
+          <div>
+            <div class="eyebrow">INSPECTOR</div>
+            <h2 id="inspector-title">图层属性</h2>
+          </div>
+          <button id="visibility-btn" class="icon-btn" title="显示 / 隐藏图层">◉</button>
+        </div>
+        <div id="inspector-body" class="inspector-body"></div>
+        <section class="panel-section texture-panel">
+          <div class="section-title"><span>印泥与磨损</span><span class="seed-badge">SEED <b id="seed-value">0</b></span></div>
+          <div class="field-grid compact">
+            <label class="field">
+              <span>印泥色</span>
+              <div class="color-field">
+                <input id="color-input" type="color" value="#a9232d">
+                <input id="color-hex" type="text" value="#A9232D" spellcheck="false">
+              </div>
+            </label>
+            <label class="field">
+              <span>随机种子</span>
+              <div class="seed-control">
+                <input id="seed-input" type="number" min="1" max="999999" value="1">
+                <button id="reseed-btn" class="mini-button" title="换一组纹理">↻</button>
+              </div>
+            </label>
+          </div>
+          <label class="range-field">
+            <span>磨损强度 <b id="wear-value">0%</b></span>
+            <input id="wear-input" type="range" min="0" max="100" step="1" value="50">
+          </label>
+          <label class="range-field">
+            <span>边缘毛糙 <b id="chip-value">0%</b></span>
+            <input id="chip-input" type="range" min="0" max="100" step="1" value="35">
+          </label>
+        </section>
+        <section class="panel-section document-panel">
+          <div class="section-title"><span>导出设置</span></div>
+          <div class="field-grid compact">
+            <label class="field">
+              <span>画布尺寸</span>
+              <select id="document-size">
+                <option value="256">256 px</option>
+                <option value="360">360 px</option>
+                <option value="512">512 px</option>
+                <option value="720">720 px</option>
+                <option value="1024">1024 px</option>
+                <option value="1440">1440 px</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>安全边距</span>
+              <select id="safe-margin">
+                <option value="18">18 px</option>
+                <option value="24">24 px</option>
+                <option value="36">36 px</option>
+                <option value="48">48 px</option>
+              </select>
+            </label>
+          </div>
+          <div id="live-check" class="live-check"></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="export-dialog" class="dialog export-dialog">
+    <form method="dialog" class="dialog-card">
+      <div class="dialog-heading">
+        <div>
+          <div class="eyebrow">EXPORT CHECK</div>
+          <h2>导出前检查</h2>
+        </div>
+        <button class="dialog-close" value="cancel" aria-label="关闭">×</button>
+      </div>
+      <div class="export-preview-row">
+        <div class="export-preview"><canvas id="export-preview-canvas"></canvas></div>
+        <div class="export-summary">
+          <div class="summary-line"><span>分辨率</span><b id="export-resolution">1440 × 1440 px</b></div>
+          <div class="summary-line"><span>背景</span><b>透明</b></div>
+          <div class="summary-line"><span>文字</span><b>保持可编辑</b></div>
+          <div class="summary-line"><span>参数</span><b>随文件保存</b></div>
+        </div>
+      </div>
+      <div id="export-issues" class="issue-list"></div>
+      <div class="export-actions">
+        <button id="export-svg-btn" type="button" class="button button-ghost">导出矢量 SVG</button>
+        <button id="export-png-btn" type="button" class="button button-primary">导出透明 PNG</button>
+      </div>
+      <p class="dialog-note">SVG 保留文字、路径与蒙版；PNG 内嵌完整设计参数。质检不通过时导出会被阻止。</p>
+    </form>
+  </dialog>
+
+  <dialog id="quality-dialog" class="dialog quality-dialog">
+    <form method="dialog" class="dialog-card">
+      <div class="dialog-heading">
+        <div>
+          <div class="eyebrow">SELF CHECK</div>
+          <h2>编辑器质检</h2>
+        </div>
+        <button class="dialog-close" value="cancel" aria-label="关闭">×</button>
+      </div>
+      <div id="quality-results" class="quality-results"></div>
+      <p class="dialog-note">质检覆盖 seed 纹理差异、安全区、长文本、极小尺寸、PNG 透明导出、SVG 可编辑性与参数回写。</p>
+      <div class="export-actions">
+        <button id="load-boundary-btn" type="button" class="button button-ghost">载入边界案例</button>
+        <button class="button button-primary" value="confirm">完成</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="name-dialog" class="dialog">
+    <form method="dialog" class="dialog-card small">
+      <div class="dialog-heading">
+        <div>
+          <div class="eyebrow" id="name-dialog-eyebrow">SAVE</div>
+          <h2 id="name-dialog-title">保存模板</h2>
+        </div>
+        <button class="dialog-close" value="cancel" aria-label="关闭">×</button>
+      </div>
+      <label class="field dialog-field">
+        <span>名称</span>
+        <input id="name-dialog-input" type="text" maxlength="48" autocomplete="off">
+      </label>
+      <div class="export-actions">
+        <button class="button button-ghost" value="cancel">取消</button>
+        <button id="name-dialog-confirm" type="button" class="button button-primary">确认</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
