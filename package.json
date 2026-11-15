@@ -1,0 +1,10 @@
+{
+  "name": "pendulum-lab",
+  "version": "1.0.0",
+  "description": "单摆/双摆确定性物理仿真：实时轨迹、摩擦开关、限值触发、回放与导出",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/run-tests.mjs && node tests/dom-smoke.mjs",
+    "serve": "python3 -m http.server 8080"
+  }
+}

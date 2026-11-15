@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>单摆 / 双摆物理仿真实验室</title>
+    <link rel="stylesheet" href="src/ui/styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <section class="panel controls">
+        <h1>摆运动仿真实验室</h1>
+
+        <label>系统类型
+          <select id="mode">
+            <option value="single">单摆</option>
+            <option value="double">双摆</option>
+          </select>
+        </label>
+
+        <fieldset>
+          <legend>第一摆</legend>
+          <label>质量 m₁ (kg)<input id="mass" type="number" min="0.1" max="50" step="0.1" value="1" /></label>
+          <label>摆长 L₁ (m)<input id="length" type="number" min="0.2" max="4" step="0.05" value="1" /></label>
+          <label>初始角度 θ₁ (°)<input id="angle" type="number" min="-180" max="180" step="1" value="45" /></label>
+        </fieldset>
+
+        <fieldset id="secondGroup">
+          <legend>第二摆（双摆）</legend>
+          <label>质量 m₂ (kg)<input id="secondMass" type="number" min="0.1" max="50" step="0.1" value="1" /></label>
+          <label>摆长 L₂ (m)<input id="secondLength" type="number" min="0.2" max="4" step="0.05" value="1" /></label>
+          <label>初始角度 θ₂ (°)<input id="secondAngle" type="number" min="-180" max="180" step="1" value="30" /></label>
+        </fieldset>
+
+        <label>摩擦阻尼系数 c (1/s)<input id="damping" type="number" min="0" max="1.5" step="0.01" value="0.2" /></label>
+        <label class="check"><input id="friction" type="checkbox" /> 开启摩擦力</label>
+        <label class="check"><input id="audioToggle" type="checkbox" /> 开启速度音效（音高=速度）</label>
+
+        <div class="buttons">
+          <button id="play">运行</button>
+          <button id="pause">暂停</button>
+          <button id="step">单步</button>
+          <button id="reset">重置</button>
+          <button id="replay">回放</button>
+        </div>
+        <div class="buttons">
+          <button id="exportCsv" class="alt">导出轨迹 CSV</button>
+          <button id="exportJson" class="alt">导出会话 JSON</button>
+        </div>
+
+        <p class="limits">
+          安全限值：速度 ≤ 5.5 m/s · 压力 ≤ 1500 N · 温度 ≤ 80 °C · 负载 0.1–50 kg ·
+          世界边界 ±4.5 m。超限立即停止并标注触发点。
+        </p>
+      </section>
+
+      <section class="panel stage">
+        <div class="stage-head">
+          <span id="status" class="badge">已暂停</span>
+          <span id="sampleCount" class="badge">0 帧</span>
+        </div>
+        <canvas id="canvas" width="640" height="640"></canvas>
+        <div id="triggerBox" class="trigger" hidden>
+          <strong>⚠ 限值触发</strong>
+          <p id="triggerMsg"></p>
+        </div>
+      </section>
+
+      <section class="panel readouts">
+        <h2>关键物理量</h2>
+        <ul id="readouts"></ul>
+        <h2>最近一次变化</h2>
+        <p id="lastChange" class="change"></p>
+      </section>
+    </main>
+    <script type="module" src="src/ui/main.mjs"></script>
+  </body>
+</html>
