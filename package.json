@@ -1,0 +1,15 @@
+{
+  "name": "pulse-trace-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic Canvas game with replay divergence diagnostics",
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "test": "node --test",
+    "audit": "node scripts/scenario-audit.js",
+    "audit:before": "node scripts/scenario-audit.js --profile full --label before --output artifacts/audit-before.json",
+    "audit:after": "node scripts/scenario-audit.js --profile lean --label after --output artifacts/audit-after.json",
+    "compare": "node scripts/compare-audit.js"
+  }
+}

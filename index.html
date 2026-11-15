@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="确定性 Canvas 小游戏，记录输入、随机数和状态哈希，并支持回放分叉诊断。"
+    />
+    <title>Pulse Trace · 回放校验台</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="ambient-grid" aria-hidden="true"></div>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <p class="brand-name">PULSE / TRACE</p>
+            <p class="brand-sub">确定性回放校验台</p>
+          </div>
+        </div>
+        <div class="topbar-status" aria-live="polite">
+          <span class="status-pill" id="mode-pill" data-mode="idle">
+            <span class="status-dot"></span>
+            <span id="mode-text">待机</span>
+          </span>
+          <span class="top-metric">
+            运行耗时
+            <strong id="elapsed-value">00:00.00</strong>
+          </span>
+          <span class="quality-label" id="quality-label">精简视觉</span>
+          <button class="ghost-button compact" id="audio-toggle" type="button">
+            声音：开
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="left-column">
+          <article class="panel game-panel">
+            <div class="panel-heading stage-heading">
+              <div>
+                <p class="eyebrow">LIVE / REPLAY</p>
+                <h1>脉冲航线</h1>
+              </div>
+              <div class="game-hud" aria-label="游戏状态">
+                <div class="hud-cell">
+                  <span>SCORE</span>
+                  <strong id="hud-score">0000</strong>
+                </div>
+                <div class="hud-cell">
+                  <span>LIVES</span>
+                  <strong id="hud-lives" class="lives">◆ ◆ ◆</strong>
+                </div>
+                <div class="hud-cell">
+                  <span>COMBO</span>
+                  <strong id="hud-combo">×0</strong>
+                </div>
+                <div class="hud-cell">
+                  <span>TICK</span>
+                  <strong id="hud-tick">000000</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="canvas-frame" id="canvas-frame">
+              <canvas
+                id="game-canvas"
+                width="960"
+                height="540"
+                tabindex="0"
+                aria-label="脉冲航线游戏画面与回放校验结果"
+              ></canvas>
+              <div class="scan-vignette" aria-hidden="true"></div>
+            </div>
+
+            <div class="control-row">
+              <button class="primary-button" id="play-toggle" type="button">
+                开始游戏
+              </button>
+              <button class="control-button" id="step-button" type="button">
+                单步 +1
+              </button>
+              <button class="control-button" id="replay-button" type="button">
+                重放校验
+              </button>
+              <button class="control-button" id="reset-button" type="button">
+                重置
+              </button>
+              <button class="control-button" id="export-button" type="button">
+                导出录包
+              </button>
+              <button class="ghost-button" id="quality-toggle" type="button">
+                切换完整视觉
+              </button>
+            </div>
+
+            <div class="timeline-block">
+              <div class="timeline-heading">
+                <div>
+                  <p class="eyebrow">DIFF TIMELINE</p>
+                  <h2>差异时间轴</h2>
+                </div>
+                <p class="timeline-readout" id="timeline-readout">
+                  T+0 / 输入 0 / 哈希 0
+                </p>
+              </div>
+              <canvas
+                id="timeline-canvas"
+                width="1000"
+                height="88"
+                aria-label="输入、随机分叉、状态分叉和异常 tick 时间轴"
+              ></canvas>
+              <div class="timeline-legend">
+                <span><i class="legend-input"></i>输入</span>
+                <span><i class="legend-rng"></i>随机分叉</span>
+                <span><i class="legend-state"></i>状态分叉</span>
+                <span><i class="legend-error"></i>结构异常</span>
+                <span class="timeline-tip">拖动时间轴可逐 tick 检视</span>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <aside class="right-column">
+          <article class="panel telemetry-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">TELEMETRY</p>
+                <h2>实时指标</h2>
+              </div>
+              <span class="tiny-tag" id="health-tag">NOMINAL</span>
+            </div>
+            <div class="metric-grid">
+              <div class="metric-cell">
+                <span>FPS</span>
+                <strong id="metric-fps">--</strong>
+                <small>渲染帧率</small>
+              </div>
+              <div class="metric-cell">
+                <span>SIM / FRAME</span>
+                <strong id="metric-sim">0.00<em>ms</em></strong>
+                <small>固定步进耗时</small>
+              </div>
+              <div class="metric-cell">
+                <span>DRAW CALLS</span>
+                <strong id="metric-draws">--</strong>
+                <small>当前帧画布操作</small>
+              </div>
+              <div class="metric-cell">
+                <span>ENTITIES</span>
+                <strong id="metric-entities">0</strong>
+                <small>活跃实体 / 粒子</small>
+              </div>
+              <div class="metric-cell">
+                <span>JS HEAP</span>
+                <strong id="metric-heap">n/a</strong>
+                <small>浏览器可用时采样</small>
+              </div>
+              <div class="metric-cell">
+                <span>AUDIO NODES</span>
+                <strong id="metric-audio">0</strong>
+                <small id="audio-state">AudioContext 未解锁</small>
+              </div>
+            </div>
+            <div class="resource-strip" id="resource-strip">
+              <span>输入 0</span><span>随机行 0</span><span>哈希 0</span
+              ><span>快照 0</span>
+            </div>
+          </article>
+
+          <article class="panel validation-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">REPLAY VERDICT</p>
+                <h2>校验结果</h2>
+              </div>
+              <span class="verdict-badge" id="verdict-badge" data-status="idle"
+                >待校验</span
+              >
+            </div>
+            <dl class="hash-list">
+              <div>
+                <dt>最终哈希</dt>
+                <dd id="final-hash">—</dd>
+              </div>
+              <div>
+                <dt>期望哈希</dt>
+                <dd id="expected-hash">—</dd>
+              </div>
+              <div>
+                <dt>首次分叉</dt>
+                <dd id="first-divergence">—</dd>
+              </div>
+              <div>
+                <dt>回放耗时</dt>
+                <dd id="replay-cost">—</dd>
+              </div>
+            </dl>
+            <p class="verdict-detail" id="verdict-detail">
+              完成一局后自动从初始状态重放，并逐步比对状态哈希。
+            </p>
+          </article>
+
+          <article class="panel recovery-panel">
+            <div class="panel-heading compact-heading">
+              <div>
+                <p class="eyebrow">RECOVERY</p>
+                <h2>恢复建议</h2>
+              </div>
+              <button class="text-button" id="clear-errors" type="button">
+                清空日志
+              </button>
+            </div>
+            <p class="recovery-copy" id="recovery-copy">
+              按“开始游戏”，使用 ← → 移动、空格 Dash；结束后将自动回放并校验。
+            </p>
+            <div class="error-log" id="error-log" aria-live="polite">
+              <div class="empty-log">尚无异常记录</div>
+            </div>
+          </article>
+        </aside>
+      </main>
+
+      <section class="audit-section">
+        <div class="audit-heading">
+          <div>
+            <p class="eyebrow">BEFORE / AFTER AUDIT</p>
+            <h2>三组场景对照</h2>
+            <p class="audit-intro">
+              完整视觉为基线，精简视觉为当前默认。两组使用同一引擎、同一录包与同一导出协议。
+            </p>
+          </div>
+          <div class="audit-summary" id="audit-summary" aria-live="polite">
+            <span class="summary-chip">读取审计证据…</span>
+          </div>
+        </div>
+
+        <div class="scenario-strip" id="scenario-strip" aria-label="场景快捷入口">
+          <button class="scenario-chip" type="button" data-scenario="normal">
+            <span>01</span> 正常输入
+          </button>
+          <button class="scenario-chip" type="button" data-scenario="boundary">
+            <span>02</span> 边界输入
+          </button>
+          <button class="scenario-chip" type="button" data-scenario="corrupt">
+            <span>03</span> 损坏输入
+          </button>
+          <p class="scenario-note" id="scenario-note">
+            点击场景可在当前画布中逐 tick 检视，不改变已有录包。
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>场景</th>
+                <th>版本 / 视觉</th>
+                <th>最终结果</th>
+                <th>首次分叉</th>
+                <th>异常日志</th>
+                <th>资源计数</th>
+                <th>耗时</th>
+              </tr>
+            </thead>
+            <tbody id="audit-body">
+              <tr>
+                <td colspan="7" class="table-loading">
+                  正在载入 artifacts/audit-before.json 与
+                  artifacts/audit-after.json…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="audit-footnote">
+          <span>失败场景可重复：固定 seed、固定 tick、固定随机行。</span>
+          <span id="audit-repro"
+            >损坏场景：tick 333 随机行被篡改，另有 3 条非法输入。</span
+          >
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>固定 60Hz · xorshift32 · FNV-1a 双通道状态哈希</span>
+        <span>← → 移动 · Space Dash · P 暂停 · ↑ 单步</span>
+      </footer>
+    </div>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
