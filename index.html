@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>液压升降平台模拟器</title>
+<style>
+  :root { --bg:#10151c; --panel:#1a2230; --fg:#dfe7f0; --dim:#8b98a8; --acc:#4fc3f7; --warn:#ffb74d; --bad:#ef5350; --ok:#81c784; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 "Segoe UI",system-ui,sans-serif; }
+  header { padding:10px 16px; display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; }
+  header h1 { font-size:18px; margin:0; }
+  header .sub { color:var(--dim); font-size:12px; }
+  main { display:flex; gap:12px; padding:0 16px 16px; flex-wrap:wrap; }
+  canvas { background:#0b0f14; border:1px solid #2a3546; border-radius:8px; }
+  .panel { background:var(--panel); border:1px solid #2a3546; border-radius:8px; padding:12px; width:330px; }
+  .panel h2 { font-size:13px; margin:0 0 8px; color:var(--acc); text-transform:uppercase; letter-spacing:.05em; }
+  .row { display:flex; align-items:center; gap:8px; margin:6px 0; }
+  .row label { width:88px; color:var(--dim); flex:none; }
+  .row output { width:86px; text-align:right; font-variant-numeric:tabular-nums; }
+  input[type=range] { flex:1; accent-color:var(--acc); }
+  button, select { background:#243044; color:var(--fg); border:1px solid #35445c; border-radius:6px; padding:6px 10px; cursor:pointer; font-size:13px; }
+  button:hover { background:#2d3c55; }
+  button.active { background:var(--acc); color:#06222f; border-color:var(--acc); }
+  .btns { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0; }
+  table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+  td { padding:2px 4px; }
+  td.k { color:var(--dim); width:44%; }
+  td.v { text-align:right; }
+  .last-change { background:#223048; border-radius:6px; padding:6px 8px; margin:8px 0; font-size:13px; }
+  .status { padding:6px 8px; border-radius:6px; margin:8px 0; font-weight:600; }
+  .status.run { background:#1d3325; color:var(--ok); }
+  .status.pause { background:#33301d; color:var(--warn); }
+  .status.fail { background:#3a1f22; color:var(--bad); }
+  .status.win { background:#173a2e; color:var(--ok); }
+  #log { max-height:150px; overflow:auto; font-size:12px; background:#0b0f14; border-radius:6px; padding:6px 8px; white-space:pre-wrap; }
+  .targets span { display:inline-block; margin-right:10px; }
+  .targets .hit { color:var(--ok); }
+  .targets .cur { color:var(--warn); }
+</style>
+</head>
+<body>
+<header>
+  <h1>液压升降平台模拟器</h1>
+  <span class="sub">双缸升降 · 泵压/流量控制 · 倾斜与重心耦合 · 固定步长确定性仿真</span>
+</header>
+<main>
+  <canvas id="cv" width="860" height="560"></canvas>
+  <div class="panel">
+    <h2>场景与控制</h2>
+    <div class="row">
+      <label>工况</label>
+      <select id="scn">
+        <option value="normal">正常工况 (300kg)</option>
+        <option value="extreme">极限载荷 (850kg)</option>
+        <option value="unstable">失稳工况 (偏载+失衡)</option>
+      </select>
+    </div>
+    <div class="row"><label>泵压</label><input id="pump" type="range" min="0" max="16" step="0.1" value="0"><output id="pumpV">0.0 MPa</output></div>
+    <div class="row"><label>左缸流量</label><input id="valveL" type="range" min="0" max="100" step="1" value="0"><output id="valveLV">0%</output></div>
+    <div class="row"><label>右缸流量</label><input id="valveR" type="range" min="0" max="100" step="1" value="0"><output id="valveRV">0%</output></div>
+    <div class="btns">
+      <button id="btnAuto">自动驾驶</button>
+      <button id="btnPause">暂停</button>
+      <button id="btnStep">单步</button>
+      <button id="btnReset">重置</button>
+      <button id="btnReplay">回放</button>
+      <button id="btnVerify">一致性校验</button>
+    </div>
+    <div id="status" class="status run">运行中</div>
+    <div class="targets" id="targets"></div>
+    <h2>关键物理量</h2>
+    <table id="vars"></table>
+    <div class="last-change" id="lastChange">最近变化: —</div>
+    <h2>事件记录（触发点）</h2>
+    <div id="log">暂无事件</div>
+  </div>
+</main>
+<script src="physics.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
