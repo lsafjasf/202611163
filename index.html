@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>街区分时人流可视化</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>街区分时人流可视化</h1>
+    <div class="meta">
+      <span id="dataVersion"></span>
+      <span id="statCaliber" class="caliber"></span>
+    </div>
+  </header>
+
+  <section class="controls">
+    <label>数据集
+      <select id="datasetSel"></select>
+    </label>
+    <label>时间窗口
+      <select id="hourStart"></select>
+      <span>至</span>
+      <select id="hourEnd"></select>
+    </label>
+    <label>来源
+      <select id="fromSel"></select>
+    </label>
+    <label>目的地
+      <select id="toSel"></select>
+    </label>
+    <button id="resetBtn">重置筛选</button>
+    <button id="exportCsvBtn">导出 CSV</button>
+    <button id="exportPngBtn">导出 PNG</button>
+  </section>
+
+  <section class="status-bar">
+    <span>当前筛选：<b id="filterSummary"></b></span>
+    <span id="selfCheck" class="self-check"></span>
+  </section>
+
+  <main>
+    <div class="canvas-wrap">
+      <canvas id="flowCanvas" width="960" height="600"></canvas>
+      <div id="tooltip" class="tooltip" hidden></div>
+    </div>
+    <aside>
+      <h2>数据质量摘要</h2>
+      <table id="qualityTable" class="quality"></table>
+      <h2>流量明细（当前筛选）</h2>
+      <table id="flowTable">
+        <thead>
+          <tr><th>来源</th><th>目的地</th><th>人次</th><th>容量</th><th>状态</th></tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+      </table>
+    </aside>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/pipeline.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

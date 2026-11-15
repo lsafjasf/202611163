@@ -1,0 +1,49 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #0f1620;
+  color: #e6edf3;
+}
+header { padding: 14px 20px 6px; }
+header h1 { margin: 0 0 6px; font-size: 20px; }
+.meta { font-size: 12px; color: #9fb0c0; display: flex; gap: 18px; flex-wrap: wrap; }
+.caliber { max-width: 720px; }
+
+.controls {
+  display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  padding: 10px 20px; background: #16202c; border-top: 1px solid #263242;
+}
+.controls label { font-size: 13px; color: #9fb0c0; display: flex; align-items: center; gap: 6px; }
+.controls select, .controls button {
+  background: #0f1620; color: #e6edf3; border: 1px solid #33445a;
+  border-radius: 4px; padding: 5px 8px; font-size: 13px;
+}
+.controls button { cursor: pointer; background: #1f2f42; }
+.controls button:hover { background: #2a405a; }
+
+.status-bar {
+  padding: 8px 20px; font-size: 13px; background: #131c27;
+  border-top: 1px solid #263242; display: flex; gap: 24px; align-items: center;
+}
+.self-check.ok { color: #4ade80; }
+.self-check.fail { color: #f87171; }
+
+main { display: flex; gap: 16px; padding: 16px 20px; align-items: flex-start; }
+.canvas-wrap { position: relative; flex: 0 0 auto; }
+canvas { background: #0b1119; border: 1px solid #263242; border-radius: 6px; display: block; }
+.tooltip {
+  position: absolute; pointer-events: none; background: rgba(10, 16, 24, 0.95);
+  border: 1px solid #3b82f6; border-radius: 4px; padding: 8px 10px;
+  font-size: 12px; line-height: 1.6; white-space: nowrap; z-index: 5;
+}
+
+aside { flex: 1; min-width: 320px; }
+aside h2 { font-size: 14px; margin: 0 0 8px; color: #9fb0c0; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; margin-bottom: 18px; }
+th, td { border: 1px solid #263242; padding: 5px 8px; text-align: right; }
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { background: #16202c; }
+tfoot td { font-weight: bold; background: #16202c; }
+tr.over td { color: #f87171; }
+.quality td:last-child { color: #fbbf24; font-weight: bold; }
