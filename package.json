@@ -1,0 +1,13 @@
+{
+  "name": "airfoil-windtunnel-sim",
+  "version": "1.0.0",
+  "description": "二维翼型风洞仿真：可调迎角/风速，升阻力与失速观察，含保护触发、暂停单步、回放与确定性重复测量",
+  "private": true,
+  "scripts": {
+    "test": "node test/run-tests.js && node test/dom-smoke.js",
+    "test:physics": "node test/run-tests.js",
+    "test:dom": "node test/dom-smoke.js",
+    "serve": "node -e \"const h=require('http'),f=require('fs'),p=require('path');const t={'.html':'text/html','.js':'text/javascript','.css':'text/css'};h.createServer((q,r)=>{const u=q.url==='/'?'/index.html':q.url;const fp=p.join(process.cwd(),u);f.readFile(fp,(e,d)=>{if(e){r.statusCode=404;r.end('404');return;}r.setHeader('Content-Type',t[p.extname(fp)]||'text/plain');r.end(d);});}).listen(8080,()=>console.log('http://localhost:8080'));\""
+  },
+  "license": "MIT"
+}
