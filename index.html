@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d1118" />
+    <title>帧字 · 可编辑字幕模板</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ff5a45'/%3E%3Cpath d='M9 9h14v3H9zm0 5h9v3H9zm0 5h14v3H9z' fill='%23160a07'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">字</span>
+          <div>
+            <h1>帧字 <span>FRAMEWORK</span></h1>
+            <p>可编辑字幕模板工作台</p>
+          </div>
+        </div>
+
+        <label class="project-name">
+          <span>项目</span>
+          <input id="projectName" type="text" value="未命名字幕" maxlength="60" aria-label="项目名称" />
+        </label>
+
+        <div class="top-actions">
+          <button id="undoBtn" class="icon-btn" type="button" title="撤销 (Ctrl+Z)" aria-label="撤销">↶</button>
+          <button id="redoBtn" class="icon-btn" type="button" title="重做 (Ctrl+Shift+Z)" aria-label="重做">↷</button>
+          <span id="saveState" class="save-state">未保存</span>
+          <button id="saveBtn" class="btn btn-ghost" type="button">保存</button>
+          <button id="reloadBtn" class="btn btn-ghost" type="button">重新载入</button>
+          <button id="importBtn" class="btn btn-ghost" type="button">导入 JSON</button>
+          <div class="export-wrap">
+            <button id="exportBtn" class="btn btn-primary" type="button" aria-haspopup="menu" aria-expanded="false">
+              导出 <span aria-hidden="true">⌄</span>
+            </button>
+            <div id="exportMenu" class="menu" role="menu" hidden>
+              <button type="button" data-export="png" role="menuitem">
+                <strong>当前帧 PNG</strong><small>由场景模型直接绘制</small>
+              </button>
+              <button type="button" data-export="svg" role="menuitem">
+                <strong>当前帧 SVG</strong><small>文字与图形保持可编辑</small>
+              </button>
+              <button type="button" data-export="json" role="menuitem">
+                <strong>模板 JSON</strong><small>含字体、图片和关键帧</small>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="template-panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">01 / 模板</span>
+              <h2>选择叙事语气</h2>
+            </div>
+            <span id="templateBadge" class="count-badge">3</span>
+          </div>
+          <div id="templateList" class="template-list" role="listbox" aria-label="字幕模板">
+            <button class="template-card is-active" type="button" data-template="news" role="option" aria-selected="true">
+              <span class="template-thumb thumb-news">
+                <span class="thumb-line"></span><span class="thumb-copy"></span><span class="thumb-copy short"></span>
+              </span>
+              <span class="template-meta"><strong>新闻</strong><small>快讯 · 下三分之一</small></span>
+              <span class="template-check">✓</span>
+            </button>
+            <button class="template-card" type="button" data-template="story" role="option" aria-selected="false">
+              <span class="template-thumb thumb-story">
+                <span class="thumb-copy centered wide"></span><span class="thumb-copy centered"></span><span class="thumb-dot"></span>
+              </span>
+              <span class="template-meta"><strong>剧情</strong><small>独白 · 居中式卡片</small></span>
+              <span class="template-check">✓</span>
+            </button>
+            <button class="template-card" type="button" data-template="prompt" role="option" aria-selected="false">
+              <span class="template-thumb thumb-prompt">
+                <span class="thumb-copy top"></span><span class="thumb-copy wide"></span><span class="thumb-copy short"></span>
+              </span>
+              <span class="template-meta"><strong>提示卡</strong><small>说明 · 顶部信息卡</small></span>
+              <span class="template-check">✓</span>
+            </button>
+          </div>
+
+          <div class="panel-block">
+            <span class="eyebrow">02 / 文本内容</span>
+            <label class="field-label" for="headlineInput">主字幕</label>
+            <textarea id="headlineInput" rows="4" maxlength="1200" placeholder="输入字幕内容…"></textarea>
+            <label class="field-label" for="kickerInput">上标 / 栏目名</label>
+            <input id="kickerInput" type="text" maxlength="120" placeholder="例如：今日观察" />
+            <div class="field-row">
+              <label class="field-label grow" for="fontSizeInput">字号
+                <span class="inline-value"><span id="fontSizeValue">56</span> px</span>
+              </label>
+            </div>
+            <input id="fontSizeInput" class="range" type="range" min="14" max="120" value="56" />
+            <div class="field-row split">
+              <label class="field-label" for="backgroundInput">字幕背景</label>
+              <label class="field-label" for="animationInput">入场动画</label>
+            </div>
+            <div class="field-row split">
+              <input id="backgroundInput" type="color" value="#111a27" aria-label="字幕背景" />
+              <select id="animationInput" aria-label="入场动画">
+                <option value="rise">上浮淡入</option>
+                <option value="fade">柔和淡入</option>
+                <option value="slide">侧滑进入</option>
+                <option value="scale">缩放聚焦</option>
+                <option value="none">无动画</option>
+              </select>
+            </div>
+            <p class="field-hint">切换模板只改变版式与样式，正文、上标和自定义图层不会被清空。</p>
+          </div>
+
+          <div class="panel-block cases-block">
+            <span class="eyebrow">03 / 校验案例</span>
+            <div class="case-actions">
+              <button id="defaultCaseBtn" class="case-btn" type="button">
+                <span class="case-icon">A</span><span><strong>默认案例</strong><small>新闻安全区内</small></span>
+              </button>
+              <button id="edgeCaseBtn" class="case-btn case-danger" type="button">
+                <span class="case-icon">!</span><span><strong>边界案例</strong><small>超长文本 · 320×180</small></span>
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        <section class="studio" aria-label="字幕预览与时间轴">
+          <div class="stage-topline">
+            <div class="stage-meta">
+              <span id="canvasSizeLabel">1280 × 720</span>
+              <span class="dot-divider"></span>
+              <span>安全边距 <input id="safeMarginInput" class="mini-number" type="number" min="0" max="240" value="72" aria-label="安全边距" /> px</span>
+            </div>
+            <div class="stage-tools">
+              <label class="toggle"><input id="safeToggle" type="checkbox" checked /><span>安全框</span></label>
+              <label class="toggle"><input id="gridToggle" type="checkbox" /><span>辅助线</span></label>
+              <span id="frameStatus" class="frame-status">编辑中</span>
+            </div>
+          </div>
+
+          <div id="stageShell" class="stage-shell">
+            <div id="canvasWrap" class="canvas-wrap">
+              <canvas id="stage" width="1280" height="720" aria-label="字幕 Canvas 预览"></canvas>
+              <div id="canvasEmptyHint" class="canvas-empty-hint" hidden>选择一个图层开始编辑</div>
+            </div>
+          </div>
+
+          <div class="timeline">
+            <div class="transport">
+              <button id="playBtn" class="play-btn" type="button" aria-label="播放入场动画">
+                <span id="playIcon">▶</span>
+              </button>
+              <button id="beatBtn" class="beat-btn" type="button" aria-label="启动 Web Audio 节拍">
+                <span id="beatDot" class="beat-dot"></span><span>节拍</span>
+              </button>
+              <div class="timecode"><span id="currentTime">0.00</span><small>/ 2.20 s</small></div>
+              <label class="bpm-field" for="bpmInput">BPM <input id="bpmInput" type="number" min="40" max="220" value="92" /></label>
+              <span id="audioState" class="audio-state">音频未启动</span>
+            </div>
+            <div class="scrub-row">
+              <span>0</span>
+              <input id="timelineInput" class="timeline-range" type="range" min="0" max="2200" value="2200" step="10" aria-label="当前帧时间" />
+              <span>2.20s</span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="inspector">
+          <div class="inspector-head">
+            <div>
+              <span class="eyebrow">属性</span>
+              <h2 id="selectionTitle">场景设置</h2>
+            </div>
+            <span id="selectionType" class="selection-type">SCENE</span>
+          </div>
+
+          <div id="sceneInspector" class="inspector-content">
+            <div class="field-grid two">
+              <label class="field-label" for="canvasWidth">画布宽
+                <input id="canvasWidth" type="number" min="160" max="3840" step="1" value="1280" />
+              </label>
+              <label class="field-label" for="canvasHeight">画布高
+                <input id="canvasHeight" type="number" min="90" max="2160" step="1" value="720" />
+              </label>
+            </div>
+            <label class="field-label" for="canvasColor">场景底色
+              <input id="canvasColor" type="color" value="#0b1220" />
+            </label>
+            <div class="preset-row">
+              <button type="button" class="chip" data-size="1280x720">1280 × 720</button>
+              <button type="button" class="chip" data-size="1920x1080">1920 × 1080</button>
+              <button type="button" class="chip chip-warn" data-size="320x180">极小 320 × 180</button>
+            </div>
+            <div class="safe-legend">
+              <span class="legend-line"></span>
+              <p>虚线内为安全区。所有可见文字与图形在导出前都会按当前画布和旋转后的包围盒复核。</p>
+            </div>
+            <div class="stat-strip">
+              <div><strong id="elementCount">5</strong><span>图层</span></div>
+              <div><strong id="keyframeCount">10</strong><span>关键帧</span></div>
+              <div><strong id="issueCount">0</strong><span>待修复</span></div>
+            </div>
+          </div>
+
+          <div id="elementInspector" class="inspector-content" hidden></div>
+
+          <div class="validation-card" id="validationCard">
+            <div class="validation-title">
+              <span id="validationIcon" class="validation-icon is-ok">✓</span>
+              <div><strong id="validationTitle">安全检查通过</strong><small id="validationSummary">所有图层位于安全区内</small></div>
+              <button id="validateBtn" class="mini-btn" type="button">复核</button>
+            </div>
+            <ul id="validationList" class="validation-list"></ul>
+          </div>
+
+          <div class="layers-block">
+            <div class="layers-head">
+              <span class="eyebrow">图层</span>
+              <div class="layer-actions">
+                <button id="addTextBtn" class="mini-btn" type="button" title="添加文字">＋文字</button>
+                <button id="addShapeBtn" class="mini-btn" type="button" title="添加矩形">＋矩形</button>
+                <button id="addImageBtn" class="mini-btn" type="button" title="添加图片">＋图片</button>
+                <button id="addFontBtn" class="mini-btn" type="button" title="导入自定义字体">＋字体</button>
+              </div>
+            </div>
+            <ul id="layerList" class="layer-list" aria-label="图层列表"></ul>
+          </div>
+        </aside>
+      </main>
+
+      <div id="toastRegion" class="toast-region" aria-live="polite"></div>
+
+      <dialog id="validationDialog" class="modal">
+        <form method="dialog" class="modal-card">
+          <div class="modal-mark">!</div>
+          <h2>导出前需要修复</h2>
+          <p id="dialogSummary">当前参数存在安全区或裁切问题。未生成文件，文本与素材均保留。</p>
+          <ul id="dialogIssues" class="modal-issues"></ul>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" value="cancel">返回编辑</button>
+            <button id="autoFixBtn" class="btn btn-primary" type="button">自动适配并导出</button>
+          </div>
+        </form>
+      </dialog>
+
+      <input id="imageFileInput" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden />
+      <input id="fontFileInput" type="file" accept=".woff,.woff2,.ttf,.otf" hidden />
+      <input id="projectFileInput" type="file" accept="application/json,.json" hidden />
+    </div>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>
