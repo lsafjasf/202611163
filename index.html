@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="按季节探索风向与风速分布，支持白天/夜间筛选、数据质量核查与当前图形导出。"
+    />
+    <title>风场观察 · 季节风向玫瑰图</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-noise" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="风场观察首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" role="img">
+            <circle cx="20" cy="20" r="15.5"></circle>
+            <path d="M20 8.5 23.1 16l5.4 4-5.4 4L20 31.5 16.9 24l-5.4-4 5.4-4Z"></path>
+            <circle cx="20" cy="20" r="2.2" class="brand-dot"></circle>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong>风场观察</strong>
+          <small>WIND OBSERVATORY</small>
+        </span>
+      </a>
+      <div class="topbar-tools">
+        <span class="local-badge">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          内置样例 · 本地计算
+        </span>
+        <label class="version-picker" for="versionSelect">
+          <span>数据版本</span>
+          <span class="select-wrap">
+            <select id="versionSelect" aria-label="选择数据版本"></select>
+            <svg viewBox="0 0 12 8" aria-hidden="true"><path d="m1 1.5 5 5 5-5" /></svg>
+          </span>
+        </label>
+        <button class="button button-primary top-export" id="exportPngTop" type="button">
+          <svg viewBox="0 0 18 18" aria-hidden="true">
+            <path d="M9 2v9m0 0 3-3m-3 3L6 8M3 12v2.2c0 .9.7 1.6 1.6 1.6h8.8c.9 0 1.6-.7 1.6-1.6V12" />
+          </svg>
+          导出当前图形
+        </button>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span>SEASONAL WIND PROFILE</span> / 2026</p>
+          <h1>风向与风速<br /><em>分布观察</em></h1>
+          <p class="hero-description">
+            以八方位玫瑰图审视季节风场。扇区半径表示观测频次，色阶表示风速区间；
+            悬停任一扇区可核对频次、平均风速与区间构成。
+          </p>
+        </div>
+        <div class="view-ticket" aria-label="当前筛选条件">
+          <div class="ticket-head">
+            <span class="ticket-label">CURRENT VIEW</span>
+            <span class="ticket-live" id="ticketLive">已同步</span>
+          </div>
+          <div class="ticket-main">
+            <span class="ticket-season" id="ticketSeason">秋季</span>
+            <span class="ticket-period" id="ticketPeriod">全天</span>
+          </div>
+          <dl class="ticket-meta">
+            <div>
+              <dt>时间窗口</dt>
+              <dd id="ticketWindow">00:00—24:00</dd>
+            </div>
+            <div>
+              <dt>数据版本</dt>
+              <dd id="ticketVersion">v1.2.0 · 完整样例</dd>
+            </div>
+            <div>
+              <dt>有效记录</dt>
+              <dd id="ticketRows">72</dd>
+            </div>
+            <div>
+              <dt>平均风速</dt>
+              <dd id="ticketAvg">0.0 m/s</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <nav class="season-switcher" id="seasonSwitcher" aria-label="选择季节"></nav>
+
+      <div class="dashboard-grid">
+        <section class="panel chart-panel" aria-labelledby="chartTitle">
+          <header class="panel-head chart-head">
+            <div class="title-block">
+              <p class="eyebrow"><span>WIND ROSE</span> / CANVAS</p>
+              <h2 id="chartTitle">秋季地面风场</h2>
+              <p class="panel-subtitle" id="chartSubtitle">八方位频次与风速区间叠加</p>
+            </div>
+            <div class="period-control" role="group" aria-label="时间窗口筛选">
+              <span class="control-caption">时间窗口</span>
+              <div class="segmented" id="periodControl"></div>
+            </div>
+          </header>
+
+          <div class="active-filters" id="activeFilters" aria-live="polite"></div>
+
+          <div class="canvas-stage" id="canvasStage">
+            <canvas
+              id="windRoseCanvas"
+              role="img"
+              aria-label="季节风向玫瑰图，包含八方位频次、风速区间图例与网格"
+            ></canvas>
+            <div class="chart-tooltip" id="chartTooltip" hidden></div>
+            <div class="chart-empty" id="chartEmpty" hidden>
+              <strong>当前筛选无可用记录</strong>
+              <span>请切换季节或时间窗口。</span>
+            </div>
+          </div>
+
+          <footer class="chart-footer">
+            <div class="metric-rail" id="metricRail">
+              <div class="rail-metric">
+                <span>当前记录</span>
+                <strong id="metricRows">—</strong>
+                <small>条</small>
+              </div>
+              <div class="rail-metric">
+                <span>平均风速</span>
+                <strong id="metricAvg">—</strong>
+                <small>m/s</small>
+              </div>
+              <div class="rail-metric">
+                <span>最大风速</span>
+                <strong id="metricMax">—</strong>
+                <small>m/s</small>
+              </div>
+              <div class="rail-metric">
+                <span>主导风向</span>
+                <strong id="metricTop">—</strong>
+                <small id="metricTopCount">— 次</small>
+              </div>
+            </div>
+            <div class="export-actions">
+              <button class="button button-ghost" id="exportCsv" type="button">
+                <svg viewBox="0 0 18 18" aria-hidden="true">
+                  <path d="M9 2v9m0 0 3-3m-3 3L6 8M3 12v2.2c0 .9.7 1.6 1.6 1.6h8.8c.9 0 1.6-.7 1.6-1.6V12" />
+                </svg>
+                CSV
+              </button>
+              <button class="button button-dark" id="exportPng" type="button">
+                <svg viewBox="0 0 18 18" aria-hidden="true">
+                  <rect x="2.5" y="3" width="13" height="12" rx="1.5"></rect>
+                  <circle cx="6.4" cy="6.8" r="1.2"></circle>
+                  <path d="m4.5 12 3-3 2.2 2.2 1.8-1.8 2 2.6"></path>
+                </svg>
+                导出 PNG
+              </button>
+            </div>
+          </footer>
+        </section>
+
+        <aside class="side-column">
+          <section class="panel quality-panel" aria-labelledby="qualityTitle">
+            <header class="panel-head compact-head">
+              <div class="title-block">
+                <p class="eyebrow"><span>DATA QUALITY</span> / AUDIT</p>
+                <h2 id="qualityTitle">数据质量摘要</h2>
+              </div>
+              <span class="scope-badge">全量样例</span>
+            </header>
+            <div class="quality-overview">
+              <div class="quality-ring" id="qualityRing">
+                <div>
+                  <strong id="qualityRate">—</strong>
+                  <span>保留率</span>
+                </div>
+              </div>
+              <div class="quality-copy">
+                <p>
+                  <strong id="qualityRaw">—</strong> 条原始记录<br />
+                  清洗后保留 <strong id="qualityValid">—</strong> 条
+                </p>
+                <span id="qualityScopeNote">当前数据版本的全部季节与时段</span>
+              </div>
+            </div>
+            <div class="quality-bar" id="qualityBar" aria-label="清洗结果构成">
+              <span class="q-valid" id="qValidBar"></span>
+              <span class="q-dup" id="qDupBar"></span>
+              <span class="q-missing" id="qMissingBar"></span>
+              <span class="q-anomaly" id="qAnomalyBar"></span>
+            </div>
+            <div class="quality-grid">
+              <div class="quality-stat">
+                <span class="quality-icon duplicate" aria-hidden="true">↻</span>
+                <span class="quality-stat-copy"><small>去重</small><strong id="qualityDup">—</strong></span>
+                <span class="quality-unit">行</span>
+              </div>
+              <div class="quality-stat">
+                <span class="quality-icon missing" aria-hidden="true">—</span>
+                <span class="quality-stat-copy"><small>缺失</small><strong id="qualityMissing">—</strong></span>
+                <span class="quality-unit">行</span>
+              </div>
+              <div class="quality-stat">
+                <span class="quality-icon anomaly" aria-hidden="true">!</span>
+                <span class="quality-stat-copy"><small>异常</small><strong id="qualityAnomaly">—</strong></span>
+                <span class="quality-unit">行</span>
+              </div>
+              <div class="quality-stat">
+                <span class="quality-icon retained" aria-hidden="true">✓</span>
+                <span class="quality-stat-copy"><small>有效</small><strong id="qualityRetained">—</strong></span>
+                <span class="quality-unit">行</span>
+              </div>
+            </div>
+            <p class="quality-footnote">
+              清洗顺序：按观测编号去重 → 必填字段校验 → 风向/风速/时间异常校验。
+              摘要固定统计当前数据版本的全量输入。
+            </p>
+          </section>
+
+          <section class="panel definition-panel" aria-labelledby="definitionTitle">
+            <header class="panel-head compact-head">
+              <div class="title-block">
+                <p class="eyebrow"><span>METHODOLOGY</span> / RULES</p>
+                <h2 id="definitionTitle">统计口径</h2>
+              </div>
+            </header>
+            <dl class="definition-list">
+              <div>
+                <dt>季节窗口</dt>
+                <dd>春 3—5月 · 夏 6—8月 · 秋 9—11月 · 冬 12—2月</dd>
+              </div>
+              <div>
+                <dt>白天 / 夜间</dt>
+                <dd>白天 06:00—18:00；夜间 18:00—次日 06:00</dd>
+              </div>
+              <div>
+                <dt>风向与频次</dt>
+                <dd>正北起顺时针八方位；频次为有效观测条数</dd>
+              </div>
+              <div>
+                <dt>平均风速</dt>
+                <dd>有效风速算术平均值，保留 1 位小数</dd>
+              </div>
+              <div>
+                <dt>风速区间</dt>
+                <dd>0—2 / 2—4 / 4—6 / 6—8 / ≥8 m/s，左闭右开</dd>
+              </div>
+              <div>
+                <dt>异常判定</dt>
+                <dd>无法解析的时间、非八方位风向、风速 &lt;0 或 &gt;40 m/s</dd>
+              </div>
+            </dl>
+            <div class="recompute-note">
+              <span aria-hidden="true">∑</span>
+              <p>页面中的所有统计值均由原始样例实时清洗、筛选与聚合，不使用预设结果。</p>
+            </div>
+          </section>
+
+          <section class="export-note" id="exportNote" aria-live="polite">
+            <span class="export-note-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20">
+                <path d="M10 2.5v10m0 0 3.2-3.2M10 12.5 6.8 9.3M3.5 14v2.2c0 .7.5 1.3 1.3 1.3h10.4c.7 0 1.3-.5 1.3-1.3V14" />
+              </svg>
+            </span>
+            <div>
+              <strong id="exportNoteTitle">导出说明</strong>
+              <p id="exportNoteText">PNG 与 CSV 均复用当前视图数据；文件中的记录数、频次与平均风速和屏幕一致。</p>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <section class="panel records-panel" aria-labelledby="recordsTitle">
+        <header class="panel-head records-head">
+          <div class="title-block">
+            <p class="eyebrow"><span>OBSERVATION LOG</span> / SYNCED</p>
+            <h2 id="recordsTitle">当前记录</h2>
+          </div>
+          <div class="records-meta">
+            <span id="recordsCount">— 条有效记录</span>
+            <span class="sync-state"><span aria-hidden="true"></span>与图形同步</span>
+          </div>
+        </header>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>观测编号</th>
+                <th>观测时间</th>
+                <th>站点</th>
+                <th>风向</th>
+                <th>风速</th>
+                <th>时段</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody"></tbody>
+          </table>
+        </div>
+        <footer class="records-foot">
+          <span id="recordsFootFilter">—</span>
+          <span>按观测时间倒序 · 已排除重复、缺失与异常记录</span>
+        </footer>
+      </section>
+
+      <footer class="page-footer">
+        <span>风场观察 / 2026 季节样例</span>
+        <span>八方位 · 五档风速 · 本地 Canvas 渲染</span>
+      </footer>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
