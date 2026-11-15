@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07161a" />
+    <title>双箱水力调度台 · Twin Tank Hydraulic Control</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b2024'/%3E%3Cpath d='M13 43h9V27h9V13h9v30h11' fill='none' stroke='%2348e0d1' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div>
+            <p class="eyebrow">PLANT 07 · HYDRAULIC BALANCE</p>
+            <h1>双箱水力调度台</h1>
+          </div>
+        </div>
+
+        <div class="mission-strip" aria-live="polite">
+          <div class="mission-item">
+            <span class="mission-label">系统状态</span>
+            <strong id="statusPill" class="status-pill running"><i></i>运行中</strong>
+          </div>
+          <div class="mission-item">
+            <span class="mission-label">剩余窗口</span>
+            <strong id="deadlineValue">80.0 <small>s</small></strong>
+          </div>
+          <div class="mission-item wide">
+            <span class="mission-label">目标区间</span>
+            <strong>A 1.05–1.90 m <b>/</b> B 0.62–1.38 m</strong>
+          </div>
+        </div>
+
+        <div class="toolbar" role="group" aria-label="仿真控制">
+          <button id="pauseButton" class="tool-button primary" type="button">
+            <span class="tool-icon">Ⅱ</span><span>暂停</span>
+          </button>
+          <button id="stepButton" class="tool-button" type="button" disabled>
+            <span class="tool-icon">▸|</span><span>单步</span>
+          </button>
+          <button id="replayButton" class="tool-button" type="button" disabled>
+            <span class="tool-icon">↺</span><span>回放</span>
+          </button>
+          <button id="resetButton" class="tool-button danger" type="button">
+            <span class="tool-icon">⟲</span><span>重置</span>
+          </button>
+          <button id="soundButton" class="tool-button icon-only" type="button" aria-pressed="false" title="开启声音">
+            <span class="tool-icon">♪</span><span class="sr-only">声音</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="stage-panel" aria-label="水力工艺图">
+          <div class="panel-heading stage-heading">
+            <div>
+              <span class="section-index">01</span>
+              <h2>水力回路</h2>
+              <span class="live-tag"><i></i>LIVE</span>
+            </div>
+            <div class="step-clock">
+              <span>固定步长 16.7 ms</span>
+              <strong id="tickValue">STEP 000000</strong>
+            </div>
+          </div>
+
+          <div class="canvas-frame">
+            <canvas id="scene" aria-label="双水箱、三座闸门、一台泵、水流与压力工艺图"></canvas>
+            <div id="eventBanner" class="event-banner" hidden>
+              <span id="eventKicker">保护触发</span>
+              <strong id="eventTitle"></strong>
+              <p id="eventDetail"></p>
+            </div>
+            <div class="canvas-legend" aria-hidden="true">
+              <span><i class="legend-dot flow"></i>水流</span>
+              <span><i class="legend-dot pressure"></i>压力</span>
+              <span><i class="legend-dot heat"></i>温升</span>
+              <span><i class="legend-arrow">→</i>受力 / 趋势</span>
+            </div>
+            <div id="resumeHint" class="resume-hint" hidden>
+              <span class="resume-kicker">已恢复计算</span>
+              <strong id="resumeText">泵推力 A → B，水位趋势向上</strong>
+            </div>
+          </div>
+
+          <div class="telemetry-grid" aria-label="关键物理量">
+            <article class="metric" data-tone="cyan">
+              <div class="metric-top"><span>A 箱水位</span><i id="tankATrend">→</i></div>
+              <strong><span id="tankAValue">0.62</span><small>m</small></strong>
+              <div class="metric-track"><span id="tankABar"></span><i style="left: 33.3%"></i><i style="left: 80%"></i></div>
+              <p>目标 1.05–1.90 m</p>
+            </article>
+            <article class="metric" data-tone="cyan">
+              <div class="metric-top"><span>B 箱水位</span><i id="tankBTrend">→</i></div>
+              <strong><span id="tankBValue">0.34</span><small>m</small></strong>
+              <div class="metric-track"><span id="tankBBar"></span><i style="left: 37.5%"></i><i style="left: 83.3%"></i></div>
+              <p>目标 0.62–1.38 m</p>
+            </article>
+            <article class="metric" data-tone="amber">
+              <div class="metric-top"><span>总管压力</span><i id="pressureTrend">→</i></div>
+              <strong><span id="pressureValue">0</span><small>kPa</small></strong>
+              <div class="metric-track"><span id="pressureBar"></span><i style="left: 80%"></i></div>
+              <p>上限 850 kPa</p>
+            </article>
+            <article class="metric" data-tone="red">
+              <div class="metric-top"><span>泵体温度</span><i id="tempTrend">→</i></div>
+              <strong><span id="tempValue">24.0</span><small>°C</small></strong>
+              <div class="metric-track"><span id="tempBar"></span><i style="left: 80%"></i></div>
+              <p>上限 105 °C</p>
+            </article>
+            <article class="metric" data-tone="violet">
+              <div class="metric-top"><span>泵负载</span><i id="loadTrend">→</i></div>
+              <strong><span id="loadValue">0.0</span><small>kW</small></strong>
+              <div class="metric-track"><span id="loadBar"></span><i style="left: 80%"></i></div>
+              <p>上限 78 kW</p>
+            </article>
+            <article class="metric" data-tone="green">
+              <div class="metric-top"><span>总流量</span><i id="flowTrend">→</i></div>
+              <strong><span id="flowValue">0.0</span><small>L/s</small></strong>
+              <div class="metric-track"><span id="flowBar"></span><i style="left: 80%"></i></div>
+              <p>进水 / 平衡 / 泵送 / 排水</p>
+            </article>
+          </div>
+
+          <div class="lower-deck">
+            <article class="change-card">
+              <div class="card-heading">
+                <span class="section-index">02</span>
+                <h3>最近一次变化</h3>
+                <time id="changeTime">T+00.00</time>
+              </div>
+              <div class="change-body">
+                <span id="changeKind" class="change-kind">SYSTEM</span>
+                <div>
+                  <strong id="changeText">系统就绪</strong>
+                  <p id="changeDetail">等待阀门与泵指令</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="trigger-card" id="triggerCard">
+              <div class="card-heading">
+                <span class="section-index">03</span>
+                <h3>触发记录</h3>
+                <span id="triggerTag" class="mini-tag idle">未触发</span>
+              </div>
+              <div id="triggerEmpty" class="trigger-empty">
+                <span>◎</span>
+                <p>压力、温度、负载、转速均在保护范围内</p>
+              </div>
+              <div id="triggerRecord" class="trigger-record" hidden></div>
+            </article>
+          </div>
+        </section>
+
+        <aside class="control-panel" aria-label="控制与校验">
+          <section class="control-section">
+            <div class="panel-heading">
+              <div>
+                <span class="section-index">04</span>
+                <h2>执行机构</h2>
+              </div>
+              <span class="hint">缓慢调节 · 避免水锤</span>
+            </div>
+            <div id="controls" class="controls">
+              <div class="control" data-channel="0">
+                <div class="control-title">
+                  <div><span class="valve-code">G1</span><strong>进水阀</strong><small>水源 → A 箱</small></div>
+                  <output id="controlOut0">66%</output>
+                </div>
+                <input id="control0" type="range" min="0" max="100" step="1" value="66" aria-label="G1 进水阀目标开度" />
+                <div class="control-foot">
+                  <span>实际 <b id="actual0">66%</b></span>
+                  <div class="nudges" aria-label="G1 微调">
+                    <button type="button" data-channel="0" data-delta="-5">−5</button>
+                    <button type="button" data-channel="0" data-delta="-1">−1</button>
+                    <button type="button" data-channel="0" data-delta="1">+1</button>
+                    <button type="button" data-channel="0" data-delta="5">+5</button>
+                  </div>
+                </div>
+              </div>
+              <div class="control" data-channel="1">
+                <div class="control-title">
+                  <div><span class="valve-code">G2</span><strong>平衡阀</strong><small>A 箱 → B 箱</small></div>
+                  <output id="controlOut1">20%</output>
+                </div>
+                <input id="control1" type="range" min="0" max="100" step="1" value="20" aria-label="G2 平衡阀目标开度" />
+                <div class="control-foot">
+                  <span>实际 <b id="actual1">20%</b></span>
+                  <div class="nudges" aria-label="G2 微调">
+                    <button type="button" data-channel="1" data-delta="-5">−5</button>
+                    <button type="button" data-channel="1" data-delta="-1">−1</button>
+                    <button type="button" data-channel="1" data-delta="1">+1</button>
+                    <button type="button" data-channel="1" data-delta="5">+5</button>
+                  </div>
+                </div>
+              </div>
+              <div class="control" data-channel="2">
+                <div class="control-title">
+                  <div><span class="valve-code">G3</span><strong>排水阀</strong><small>B 箱 → 排放</small></div>
+                  <output id="controlOut2">29%</output>
+                </div>
+                <input id="control2" type="range" min="0" max="100" step="1" value="29" aria-label="G3 排水阀目标开度" />
+                <div class="control-foot">
+                  <span>实际 <b id="actual2">29%</b></span>
+                  <div class="nudges" aria-label="G3 微调">
+                    <button type="button" data-channel="2" data-delta="-5">−5</button>
+                    <button type="button" data-channel="2" data-delta="-1">−1</button>
+                    <button type="button" data-channel="2" data-delta="1">+1</button>
+                    <button type="button" data-channel="2" data-delta="5">+5</button>
+                  </div>
+                </div>
+              </div>
+              <div class="control pump-control" data-channel="pump">
+                <div class="control-title">
+                  <div><span class="valve-code pump">P</span><strong>转移泵</strong><small>A 箱 → B 箱</small></div>
+                  <output id="controlOutPump">42%</output>
+                </div>
+                <input id="controlPump" type="range" min="0" max="100" step="1" value="42" aria-label="转移泵目标转速" />
+                <div class="control-foot">
+                  <span>实际 <b id="actualPump">42%</b> · <b id="rpmValue">1294</b> rpm</span>
+                  <div class="nudges" aria-label="泵微调">
+                    <button type="button" data-channel="pump" data-delta="-5">−5</button>
+                    <button type="button" data-channel="pump" data-delta="-1">−1</button>
+                    <button type="button" data-channel="pump" data-delta="1">+1</button>
+                    <button type="button" data-channel="pump" data-delta="5">+5</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="pumpAlarm" class="pump-alarm" hidden>
+              <span>!</span>
+              <div><strong>泵入口缺水</strong><p>A 箱低于 0.28 m，正在干转升温。</p></div>
+            </div>
+          </section>
+
+          <section class="limit-section">
+            <div class="panel-heading compact">
+              <div><span class="section-index">05</span><h2>保护限值</h2></div>
+              <span id="limitSummary" class="mini-tag safe">全部正常</span>
+            </div>
+            <div class="limit-list">
+              <div class="limit-row" data-limit="pressure"><span>压力</span><div><i></i></div><b>850 kPa</b></div>
+              <div class="limit-row" data-limit="temperature"><span>温度</span><div><i></i></div><b>105 °C</b></div>
+              <div class="limit-row" data-limit="load"><span>负载</span><div><i></i></div><b>78 kW</b></div>
+              <div class="limit-row" data-limit="speed"><span>转速</span><div><i></i></div><b>3000 rpm</b></div>
+              <div class="limit-row" data-limit="rate"><span>阀速</span><div><i></i></div><b>安全 1.2 /s</b></div>
+            </div>
+          </section>
+
+          <section class="validation-section">
+            <div class="panel-heading compact">
+              <div><span class="section-index">06</span><h2>内置校验</h2></div>
+              <button id="validateButton" class="text-button" type="button">重新运行</button>
+            </div>
+            <div id="validationSummary" class="validation-summary">
+              <span class="spinner"></span><p>正在验证物理边界与确定性…</p>
+            </div>
+            <div id="validationList" class="validation-list" aria-live="polite"></div>
+            <p class="validation-note">场景在隔离状态中运行，不会改变当前工况。点“回放”检查触发过程。</p>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="footer">
+        <p><span>操作提示</span> 用 ±1 / ±5 缓慢调阀；双箱同时达标并保持 1.5 s 即完成。快捷键：空格暂停，N 单步，R 重置。</p>
+        <p id="hashValue">SEED 0x00000000</p>
+      </footer>
+    </div>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
