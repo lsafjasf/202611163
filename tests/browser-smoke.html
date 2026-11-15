@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>浏览器冒烟测试 · 双人追光</title>
+  <style>
+    body { font-family: sans-serif; background: #0c1020; color: #e4eaff; padding: 20px; }
+    li { margin: 4px 0; }
+    .ok { color: #46e08a; }
+    .fail { color: #ff5a5a; }
+    canvas { width: 480px; border: 1px solid #334; border-radius: 8px; }
+    pre { background: #11182c; padding: 10px; border-radius: 8px; max-height: 260px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>浏览器冒烟测试</h1>
+  <ul id="results"></ul>
+  <canvas id="c" width="960" height="600"></canvas>
+  <pre id="log"></pre>
+  <script type="module" src="./browser-smoke.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "spotlight-duet",
+  "version": "1.0.0",
+  "description": "双人协作舞台追光游戏（Canvas + Web Audio + 回放）",
+  "type": "module",
+  "scripts": {
+    "test": "node test/engine.test.js",
+    "scenarios": "node test/scenarios.js",
+    "serve": "python3 -m http.server 8080"
+  }
+}

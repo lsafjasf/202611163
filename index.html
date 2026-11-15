@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>双人追光控制台 · Spotlight Duet</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>双人追光控制台</h1>
+    <div class="shared-hud">
+      <div class="hud-item">
+        <span class="label">倒计时</span>
+        <span id="hud-time" class="value">45.0s</span>
+      </div>
+      <div class="hud-item">
+        <span class="label">追光段落</span>
+        <span id="hud-cue" class="value">0/5</span>
+      </div>
+      <div class="hud-item">
+        <span class="label">警告</span>
+        <span id="hud-warn" class="value">0/3</span>
+      </div>
+      <div class="hud-item">
+        <span class="label">冲突次数</span>
+        <span id="hud-conflict" class="value">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="label">状态</span>
+        <span id="hud-phase" class="value">待开始</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="btn-start" type="button">开始</button>
+      <button id="btn-pause" type="button">暂停(P)</button>
+      <button id="btn-restart" type="button">重开(R)</button>
+      <button id="btn-swap" type="button">轮换职责(T)</button>
+      <button id="btn-debug" type="button">单人调试(G)</button>
+      <button id="btn-replays" type="button">回放</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="console" id="console-0">
+      <h2>左侧灯控台 <small id="role-0"></small></h2>
+      <div class="meter">
+        <span>方向角</span><strong id="m0-aim">0°</strong>
+      </div>
+      <div class="meter">
+        <span>灯架热量</span>
+        <div class="bar"><div id="m0-heat" class="fill heat"></div></div>
+      </div>
+      <div class="meter">
+        <span>输出亮度</span>
+        <div class="bar"><div id="m0-bri" class="fill bri"></div></div>
+      </div>
+      <div class="meter">
+        <span>警告</span><strong id="m0-warn">0/3</strong>
+      </div>
+      <p class="keys">W/A/S/D（↑亮度 ↓亮度 ←转向 →转向）</p>
+    </section>
+
+    <section class="stage-wrap">
+      <canvas id="stage" width="960" height="600"></canvas>
+      <div id="overlay" class="overlay hidden">
+        <div class="overlay-card">
+          <h2 id="overlay-title"></h2>
+          <p id="overlay-text"></p>
+          <div class="overlay-actions">
+            <button id="overlay-restart" type="button">重新开始</button>
+            <button id="overlay-replay" type="button">查看回放</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="console" id="console-1">
+      <h2>右侧灯控台 <small id="role-1"></small></h2>
+      <div class="meter">
+        <span>方向角</span><strong id="m1-aim">0°</strong>
+      </div>
+      <div class="meter">
+        <span>灯架热量</span>
+        <div class="bar"><div id="m1-heat" class="fill heat"></div></div>
+      </div>
+      <div class="meter">
+        <span>输出亮度</span>
+        <div class="bar"><div id="m1-bri" class="fill bri"></div></div>
+      </div>
+      <div class="meter">
+        <span>警告</span><strong id="m1-warn">0/3</strong>
+      </div>
+      <p class="keys">方向键（↑亮度 ↓亮度 ←转向 →转向）</p>
+    </section>
+  </main>
+
+  <section class="bottom">
+    <div class="log-panel">
+      <h3>事件日志（含冲突时刻）</h3>
+      <ul id="event-log"></ul>
+    </div>
+    <div class="help">
+      <h3>玩法说明</h3>
+      <ul>
+        <li>方向玩家转动灯架对准金色标记的目标演员；亮度玩家保持亮度不低于 30% 即覆盖，保持 2.5 秒完成一段。</li>
+        <li>亮度 ≥ 80% 且光锥同时完全罩住两名演员会触发警告，累计 3 次演出失败。</li>
+        <li>持续转动灯架会过热锁死，停转散热到 45% 以下恢复。</li>
+        <li>两侧按键独立、可同时按下；T 键轮换职责，G 键进入单人调试（一侧控制全部）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <div id="replay-modal" class="modal hidden">
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <h2>演出回放</h2>
+        <button id="replay-close" type="button">关闭</button>
+      </div>
+      <div class="replay-cols">
+        <div>
+          <h3>存档列表</h3>
+          <ul id="replay-list"></ul>
+          <button id="replay-export" type="button">导出当前回放 JSON</button>
+        </div>
+        <div>
+          <h3 id="replay-title">未选择回放</h3>
+          <canvas id="replay-canvas" width="960" height="600"></canvas>
+          <div class="replay-controls">
+            <button id="rp-play" type="button">播放</button>
+            <button id="rp-pause" type="button">暂停</button>
+            <input id="rp-seek" type="range" min="0" max="1000" value="0" />
+            <span id="rp-time">0.0s</span>
+          </div>
+          <div id="rp-conflicts" class="conflict-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
