@@ -1,0 +1,16 @@
+{
+  "name": "beatboard",
+  "version": "1.0.0",
+  "description": "六格分镜与 Web Audio 鼓点共用时钟的交互式时间线编辑器",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "dev": "python3 -m http.server 4173"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}

@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="BEATBOARD 六格分镜与合成鼓点时间线编辑器"
+    />
+    <title>BEATBOARD · 夜航六格分镜</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </span>
+          <span class="brand-name">BEATBOARD</span>
+          <span class="brand-edition">STORY / 06</span>
+        </div>
+
+        <div class="project-heading">
+          <div class="eyebrow">CURRENT PROJECT</div>
+          <div class="project-title-row">
+            <h1 id="projectTitle">夜航 · 六格分镜</h1>
+            <span class="project-pill" id="fpsPill">30 FPS</span>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <div class="save-state" id="saveState">
+            <span class="status-dot"></span>
+            <span id="saveStateText">正在载入</span>
+          </div>
+          <button class="btn btn-ghost" id="reloadProjectBtn" title="恢复上次保存的工程">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.2 7.2A6.5 6.5 0 1 1 3.8 12M4.2 7.2V2.9m0 4.3h4.3"/></svg>
+            重新载入
+          </button>
+          <button class="btn btn-secondary" id="saveProjectBtn">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3.5h9.2L16 6.3v10.2H4zM6.5 3.5v5h7v-5M6.5 16.5v-5h7v5"/></svg>
+            保存工程
+          </button>
+          <div class="export-wrap">
+            <button class="btn btn-primary" id="exportBtn" aria-haspopup="menu" aria-expanded="false">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9m0 0 3.4-3.4M10 12 6.6 8.6M4 13.5v3h12v-3"/></svg>
+              导出
+              <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg>
+            </button>
+            <div class="export-menu" id="exportMenu" role="menu" hidden>
+              <button role="menuitem" data-export="video">
+                <span class="menu-icon amber">▶</span>
+                <span><b>导出影片</b><small>WebM · 画面与鼓点</small></span>
+              </button>
+              <button role="menuitem" data-export="sheet">
+                <span class="menu-icon teal">▦</span>
+                <span><b>导出分镜表</b><small>PNG · 3 × 2 联系表</small></span>
+              </button>
+              <button role="menuitem" data-export="csv">
+                <span class="menu-icon muted">≡</span>
+                <span><b>导出时间数据</b><small>CSV · 入点 / 出点 / 转场</small></span>
+              </button>
+              <div class="menu-sep"></div>
+              <button role="menuitem" data-export="json">
+                <span class="menu-icon muted">↓</span>
+                <span><b>备份工程</b><small>JSON · 可重新打开</small></span>
+              </button>
+            </div>
+          </div>
+          <input type="file" id="projectFile" accept=".json,application/json" hidden />
+        </div>
+      </header>
+
+      <div class="workspace">
+        <aside class="shot-rail" aria-label="镜头列表">
+          <div class="rail-heading">
+            <span>SHOT LIST</span>
+            <span class="count-badge">06</span>
+          </div>
+          <div class="shot-list" id="shotList"></div>
+          <button class="rail-add" id="openProjectBtn" title="打开已备份的工程">
+            <span>＋</span>
+            打开工程文件
+          </button>
+        </aside>
+
+        <main class="stage-column">
+          <div class="stage-toolbar">
+            <div class="stage-location">
+              <span class="rec-dot"></span>
+              <span id="stageShotNo">SHOT 01</span>
+              <span class="slash">/</span>
+              <strong id="stageShotName">离岸</strong>
+            </div>
+            <div class="stage-badges">
+              <button class="mini-toggle active" id="safeFrameBtn" title="显示安全框">16:9</button>
+              <span class="stage-clock" id="stageClock">00:00:00</span>
+            </div>
+          </div>
+
+          <div class="preview-stage">
+            <div class="preview-frame" id="previewFrame">
+              <canvas id="previewCanvas" aria-label="分镜预览"></canvas>
+              <div class="safe-frame" id="safeFrame" aria-hidden="true"></div>
+              <div class="preview-vignette" aria-hidden="true"></div>
+              <div class="frame-label top-left" id="frameShotLabel">01</div>
+              <div class="frame-label top-right" id="frameTimeLabel">00:00:00</div>
+              <div class="transition-flash" id="transitionFlash" aria-hidden="true"></div>
+              <div class="beat-monitor" id="beatMonitor" aria-label="节拍监视">
+                <span class="beat-caption">BEAT</span>
+                <i class="beat-dot on"></i><i class="beat-dot"></i><i class="beat-dot"></i><i class="beat-dot"></i>
+                <span class="beat-count" id="beatCount">01</span>
+              </div>
+              <div class="preview-loading" id="previewLoading">正在准备画布…</div>
+            </div>
+          </div>
+
+          <div class="transport">
+            <div class="transport-left">
+              <button class="icon-btn" id="toStartBtn" title="回到开头（Home）">
+                <svg viewBox="0 0 20 20"><path d="M5 4v12M15.5 5 8 10l7.5 5z"/></svg>
+              </button>
+              <button class="icon-btn" id="prevShotBtn" title="上一格">
+                <svg viewBox="0 0 20 20"><path d="m13.5 4.5-6 5.5 6 5.5z"/></svg>
+              </button>
+              <button class="play-btn" id="playBtn" title="播放 / 暂停（空格）">
+                <svg class="play-icon" viewBox="0 0 20 20"><path d="m7 4.5 8 5.5-8 5.5z"/></svg>
+                <svg class="pause-icon" viewBox="0 0 20 20"><path d="M6.5 4.5h3v11h-3zM11.5 4.5h3v11h-3z"/></svg>
+              </button>
+              <button class="icon-btn" id="nextShotBtn" title="下一格">
+                <svg viewBox="0 0 20 20"><path d="m6.5 4.5 6 5.5-6 5.5z"/></svg>
+              </button>
+              <button class="icon-btn" id="loopBtn" title="循环播放（L）">
+                <svg viewBox="0 0 20 20"><path d="M4 8.5A4 4 0 0 1 8 4.5h6m0 0-2.5-2.5M14 4.5l-2.5 2.5M16 11.5a4 4 0 0 1-4 4H6m0 0 2.5 2.5M6 15.5l2.5-2.5"/></svg>
+              </button>
+            </div>
+            <div class="time-display">
+              <span id="currentTimecode">00:00:00:00</span>
+              <span class="time-divider">/</span>
+              <span class="time-total" id="totalTimecode">00:00:28:00</span>
+            </div>
+            <div class="transport-right">
+              <span class="sound-label" id="audioStatus">
+                <i></i> DRUMS · 120 BPM
+              </span>
+              <button class="btn btn-small btn-secondary" id="validateBtn" title="检查同一时刻的画面与声音是否可复现">
+                <svg viewBox="0 0 20 20"><path d="m4 10 4 4 8-8"/></svg>
+                一致性检查
+              </button>
+            </div>
+          </div>
+        </main>
+
+        <aside class="inspector" aria-label="镜头检查器">
+          <div class="inspector-heading">
+            <div>
+              <span class="eyebrow">SHOT INSPECTOR</span>
+              <h2><span id="inspectorNo">01</span> · <span id="inspectorName">离岸</span></h2>
+            </div>
+            <span class="shot-color" id="shotColor"></span>
+          </div>
+
+          <div class="inspector-scroll">
+            <section class="panel-section">
+              <div class="section-title">
+                <span>修剪 · TRIM</span>
+                <span class="source-range" id="sourceRange">SOURCE 08.0s</span>
+              </div>
+              <div class="trim-readout">
+                <div>
+                  <label>入点 IN</label>
+                  <div class="number-field"><input id="inPointInput" type="number" step="0.1" min="0" max="7.5" /><span>s</span></div>
+                </div>
+                <div class="trim-arrow">→</div>
+                <div>
+                  <label>出点 OUT</label>
+                  <div class="number-field"><input id="outPointInput" type="number" step="0.1" min="0.5" max="8" /><span>s</span></div>
+                </div>
+              </div>
+              <div class="duration-row">
+                <label for="durationInput">镜头时长</label>
+                <div class="duration-stepper">
+                  <button type="button" id="durationMinus" aria-label="减少时长">−</button>
+                  <input id="durationInput" type="number" step="0.1" min="0.5" max="8" />
+                  <span>s</span>
+                  <button type="button" id="durationPlus" aria-label="增加时长">＋</button>
+                </div>
+              </div>
+              <div class="timeline-span">
+                <span>时间线位置</span>
+                <b id="timelineSpan">00:00.00 – 00:04.00</b>
+              </div>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-title">
+                <span>字幕 · CAPTION</span>
+                <span class="chip" id="captionState">可见</span>
+              </div>
+              <label class="field-label" for="subtitleInput">画面文字</label>
+              <textarea id="subtitleInput" rows="2" maxlength="60" placeholder="输入这一格的字幕"></textarea>
+              <div class="caption-times">
+                <label>入 <input id="subtitleInInput" type="number" step="0.1" min="0" max="7.9" /></label>
+                <label>出 <input id="subtitleOutInput" type="number" step="0.1" min="0.1" max="8" /></label>
+                <span class="relative-note">相对本格</span>
+              </div>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-title">
+                <span>转场 · TRANSITION</span>
+                <span class="chip quiet" id="transitionPreviewLabel">叠化</span>
+              </div>
+              <div class="two-fields">
+                <label class="select-field">
+                  <span>入格方式</span>
+                  <select id="transitionSelect">
+                    <option value="cut">硬切</option>
+                    <option value="dissolve">叠化</option>
+                    <option value="wipe">横向擦除</option>
+                    <option value="flash">闪白</option>
+                  </select>
+                </label>
+                <label class="input-field">
+                  <span>持续时间</span>
+                  <div class="number-field"><input id="transitionDurationInput" type="number" step="0.1" min="0" max="2" /><b>s</b></div>
+                </label>
+              </div>
+            </section>
+
+            <section class="panel-section keyframe-section">
+              <div class="section-title">
+                <span>关键帧 · KEYFRAMES</span>
+                <span class="chip accent" id="keyframeCount">02</span>
+              </div>
+              <div class="keyframe-list" id="keyframeList"></div>
+              <button class="btn btn-small btn-secondary full" id="addKeyframeBtn">
+                <span>＋</span> 在播放头记录关键帧
+              </button>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-title">
+                <span>节拍与声音 · AUDIO</span>
+                <span class="audio-live"><i></i> LIVE</span>
+              </div>
+              <div class="audio-fields">
+                <label class="input-field"><span>BPM</span><div class="number-field"><input id="bpmInput" type="number" step="1" min="60" max="200" /><b>♩</b></div></label>
+                <label class="input-field"><span>音频起点</span><div class="number-field"><input id="audioStartInput" type="number" step="0.1" min="0" max="20" /><b>s</b></div></label>
+              </div>
+              <div class="wave-visual" id="waveVisual" aria-hidden="true"></div>
+              <p class="helper-copy">鼓组由 Web Audio 实时合成，并与画面共用主时钟。移动播放头会重新调度声音。</p>
+            </section>
+          </div>
+        </aside>
+      </div>
+
+      <section class="timeline-panel" aria-label="多轨时间线">
+        <div class="timeline-toolbar">
+          <div class="timeline-title">
+            <span class="timeline-mark"></span>
+            <strong>TIMELINE</strong>
+            <span class="timeline-meta" id="timelineMeta">6 SHOTS · 28.0s</span>
+          </div>
+          <div class="timeline-tools">
+            <div class="legend">
+              <span><i class="legend-video"></i>画面</span>
+              <span><i class="legend-caption"></i>字幕</span>
+              <span><i class="legend-audio"></i>声音</span>
+            </div>
+            <button class="tool-chip active" id="snapBtn" aria-pressed="true">
+              <svg viewBox="0 0 16 16"><path d="M3 3v10M13 3v10M3 6h10M3 10h10"/></svg>
+              吸附 0.25s
+            </button>
+            <button class="tool-chip" id="fitBtn">适应窗口</button>
+          </div>
+        </div>
+        <div class="timeline-scroll" id="timelineScroll">
+          <canvas id="timelineCanvas" aria-label="时间线，拖动片段边缘调整入点和出点"></canvas>
+          <div class="timeline-hint" id="timelineHint">拖动片段两侧手柄调整 IN / OUT · 点击标尺定位</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow" id="modalEyebrow">EXPORT</span>
+            <h2 id="modalTitle">导出影片</h2>
+          </div>
+          <button class="icon-btn" id="modalCloseBtn" aria-label="关闭">
+            <svg viewBox="0 0 20 20"><path d="m5 5 10 10M15 5 5 15"/></svg>
+          </button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-actions" id="modalActions"></div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
