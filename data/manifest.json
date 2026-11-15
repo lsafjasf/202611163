@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-16T08:20:00+08:00",
+  "generator": "scripts/generate-data.mjs",
+  "datasets": [
+    {
+      "id": "normal",
+      "title": "正常序列",
+      "version": "NORM-2026.11.16.1",
+      "description": "连续采样、无重复、无缺失；用于验证基准曲线与自动校准。",
+      "qualityHint": "无缺失 · 无重复 · 无异常",
+      "file": "./data/normal.json"
+    },
+    {
+      "id": "missing",
+      "title": "缺失序列",
+      "version": "GAPS-2026.11.16.2",
+      "description": "包含 9 个传感器时槽缺测与 3 个显著异常点。",
+      "qualityHint": "9 缺失 · 3 异常",
+      "file": "./data/missing.json"
+    },
+    {
+      "id": "duplicate",
+      "title": "重复序列",
+      "version": "DUPS-2026.11.16.3",
+      "description": "包含 12 条重复读数、3 个缺失时槽与 2 个显著异常点。",
+      "qualityHint": "12 重复 · 3 缺失 · 2 异常",
+      "file": "./data/duplicate.json"
+    }
+  ]
+}

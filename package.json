@@ -1,0 +1,15 @@
+{
+  "name": "trident-sensor-calibration",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "三源传感器校准与数据质量工作台",
+  "scripts": {
+    "start": "python3 -m http.server ${PORT:-4173}",
+    "test": "node --test",
+    "data": "node scripts/generate-data.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

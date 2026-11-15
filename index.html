@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#17322d" />
+    <title>TRIDENT · 三源传感器校准台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="TRIDENT 三源校准">
+          <span class="brand-mark" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </span>
+          <span class="brand-copy">
+            <strong>TRIDENT</strong>
+            <small>三源校准工作台</small>
+          </span>
+        </a>
+        <div class="topbar-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>计算引擎在线</span>
+          <span class="topbar-divider"></span>
+          <span class="version-inline">版本 <b id="top-version">—</b></span>
+          <span class="topbar-divider"></span>
+          <time id="top-clock">2026.11.16</time>
+        </div>
+      </header>
+
+      <div id="loading" class="loading-state">
+        <span class="loading-orbit" aria-hidden="true"></span>
+        <strong>载入原始样例与派生结果</strong>
+        <small>正在校验数据版本与统计口径…</small>
+      </div>
+
+      <main id="main" class="workspace" hidden>
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow"><span>FIELD NOTE 11/16</span> · THREE-SOURCE CALIBRATION</p>
+            <h1>让三枚传感器<span>说同一种语言</span></h1>
+            <p class="hero-description">
+              对齐偏移、漂移与缺测，拖动时间窗口和校准点，同时观察原始、校准与参考曲线。
+              校准只生成派生视图，不改变任何原始数据结构。
+            </p>
+          </div>
+          <div class="hero-version">
+            <div class="version-label">CURRENT DATA VERSION</div>
+            <strong id="hero-version">—</strong>
+            <p id="hero-source">—</p>
+            <div class="version-proof">
+              <span>RAW IMMUTABLE</span>
+              <span>30 S BUCKET</span>
+              <span>DERIVED ON DEMAND</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="dataset-section" aria-labelledby="dataset-heading">
+          <div class="section-heading compact">
+            <div>
+              <p class="section-kicker">01 / 数据版本</p>
+              <h2 id="dataset-heading">选择样例序列</h2>
+            </div>
+            <p class="section-note">三组原始样例均保留可追溯记录，切换后恢复各自的窗口与校准状态。</p>
+          </div>
+          <div id="dataset-tabs" class="dataset-tabs" role="tablist" aria-label="样例数据组"></div>
+        </section>
+
+        <div class="workspace-grid">
+          <div class="main-stack">
+            <section class="card filter-card" aria-labelledby="filter-heading">
+              <div class="card-heading">
+                <div>
+                  <p class="section-kicker">02 / 筛选与校准</p>
+                  <h2 id="filter-heading">当前筛选条件</h2>
+                </div>
+                <span id="filtered-badge" class="soft-badge">FILTERED VIEW</span>
+              </div>
+              <div id="condition-chips" class="condition-chips"></div>
+
+              <div class="timeline-block">
+                <div class="timeline-meta">
+                  <strong id="window-label">08:00:00–08:20:00</strong>
+                  <span id="window-duration">20 分钟</span>
+                </div>
+                <div id="timeline" class="timeline" aria-label="拖动时间窗口">
+                  <div class="timeline-rail"></div>
+                  <div id="timeline-selection" class="timeline-selection"></div>
+                  <div id="timeline-ticks" class="timeline-ticks"></div>
+                  <button id="handle-start" class="window-handle start" type="button" aria-label="拖动窗口起点"></button>
+                  <button id="handle-end" class="window-handle end" type="button" aria-label="拖动窗口终点"></button>
+                </div>
+              </div>
+
+              <div class="filter-controls">
+                <div class="preset-group" aria-label="时间窗口预设">
+                  <button type="button" class="preset-button" data-preset="full">全程</button>
+                  <button type="button" class="preset-button" data-preset="first">前 10 分钟</button>
+                  <button type="button" class="preset-button" data-preset="middle">中段</button>
+                  <button type="button" class="preset-button" data-preset="last">后 10 分钟</button>
+                  <button type="button" class="preset-button custom" data-preset="custom">
+                    <span>自定义</span>
+                    <small id="custom-window-hint">0–40</small>
+                  </button>
+                </div>
+                <div class="filter-divider"></div>
+                <div id="sensor-toggles" class="sensor-toggles" aria-label="传感器筛选"></div>
+                <label class="switch-label" title="剔除残差绝对值超过阈值的时槽">
+                  <span>剔除异常</span>
+                  <input id="anomaly-toggle" type="checkbox" />
+                  <i aria-hidden="true"></i>
+                </label>
+              </div>
+            </section>
+
+            <section class="metric-grid" aria-label="当前窗口统计">
+              <article class="metric-card primary">
+                <div class="metric-top">
+                  <span>校准后 MAE</span>
+                  <i class="metric-line" aria-hidden="true"></i>
+                </div>
+                <div class="metric-value"><strong id="metric-cal-mae">—</strong><small>°C</small></div>
+                <p>原始 <b id="metric-raw-mae">—</b> °C</p>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span>最大偏差</span>
+                  <span class="metric-tag">校准后</span>
+                </div>
+                <div class="metric-value"><strong id="metric-cal-max">—</strong><small>°C</small></div>
+                <p>原始 <b id="metric-raw-max">—</b> °C</p>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span>MAE 改善</span>
+                  <span class="metric-tag positive" id="metric-improvement-tag">—</span>
+                </div>
+                <div class="metric-value"><strong id="metric-improvement">—</strong><small>%</small></div>
+                <p>基于同一批有效配对样本</p>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span>有效配对</span>
+                  <span class="metric-tag">当前窗口</span>
+                </div>
+                <div class="metric-value"><strong id="metric-samples">—</strong><small>组</small></div>
+                <p><b id="metric-coverage">—</b> 传感器时槽覆盖率</p>
+              </article>
+            </section>
+
+            <section class="card chart-card" aria-labelledby="chart-heading">
+              <div class="card-heading chart-heading">
+                <div>
+                  <p class="section-kicker">03 / 曲线比较</p>
+                  <h2 id="chart-heading">原始 · 校准 · 参考</h2>
+                </div>
+                <div class="legend" aria-label="图例">
+                  <span><i class="legend-swatch raw"></i>原始</span>
+                  <span><i class="legend-swatch calibrated"></i>校准后</span>
+                  <span><i class="legend-swatch reference"></i>参考</span>
+                  <span><i class="legend-swatch band"></i>误差带</span>
+                </div>
+              </div>
+              <div class="chart-stage">
+                <canvas id="chart" aria-label="三传感器原始、校准与参考温度曲线及误差带"></canvas>
+                <div class="chart-note">
+                  <span><i></i>悬停查看逐传感器数值</span>
+                  <span><i></i>在误差区拖动菱形校准点</span>
+                </div>
+              </div>
+              <div class="chart-footer">
+                <div>
+                  <span class="footer-label">CURRENT SCOPE</span>
+                  <strong id="chart-scope">—</strong>
+                </div>
+                <p id="chart-formula">—</p>
+              </div>
+            </section>
+          </div>
+
+          <aside class="side-stack">
+            <section class="card quality-card" aria-labelledby="quality-heading">
+              <div class="card-heading">
+                <div>
+                  <p class="section-kicker">DATA HEALTH</p>
+                  <h2 id="quality-heading">数据质量摘要</h2>
+                </div>
+                <span class="quality-seal">RAW CHECK</span>
+              </div>
+              <div class="quality-hero">
+                <strong id="quality-coverage">—</strong>
+                <span>传感器时槽覆盖率</span>
+              </div>
+              <div class="quality-bars">
+                <div>
+                  <span>去重</span>
+                  <strong id="quality-duplicates">—</strong>
+                  <small>条重复</small>
+                </div>
+                <div>
+                  <span>缺失</span>
+                  <strong id="quality-missing">—</strong>
+                  <small>个时槽</small>
+                </div>
+                <div>
+                  <span>异常</span>
+                  <strong id="quality-anomalies">—</strong>
+                  <small>个时槽</small>
+                </div>
+              </div>
+              <div id="quality-window" class="quality-window"></div>
+              <p class="quality-method" id="quality-method">—</p>
+            </section>
+
+            <section class="card calibration-card" aria-labelledby="calibration-heading">
+              <div class="card-heading">
+                <div>
+                  <p class="section-kicker">CALIBRATION</p>
+                  <h2 id="calibration-heading">校准点</h2>
+                </div>
+                <span class="derived-badge">派生层</span>
+              </div>
+              <p class="calibration-copy">
+                每个校准点设定一个目标残差。传感器在锚点之间进行线性偏移修正，区间外取端点值。
+              </p>
+              <div id="sensor-selector" class="sensor-selector" role="group" aria-label="选择校准传感器"></div>
+              <div id="anchor-list" class="anchor-list"></div>
+              <button id="reset-calibration" class="text-button" type="button">
+                恢复自动锚点
+                <span aria-hidden="true">↺</span>
+              </button>
+              <div class="immutable-note">
+                <span class="immutable-icon">R</span>
+                <p><strong>原始层不可变</strong>校准仅写入派生视图，不新增、不删除、不重排原始记录。</p>
+              </div>
+            </section>
+
+            <section class="card definition-card" aria-labelledby="definition-heading">
+              <div class="card-heading">
+                <div>
+                  <p class="section-kicker">METHOD</p>
+                  <h2 id="definition-heading">统计口径</h2>
+                </div>
+              </div>
+              <dl id="definition-list" class="definition-list"></dl>
+              <div class="version-card">
+                <span>DATA VERSION</span>
+                <strong id="definition-version">—</strong>
+                <p id="definition-source">—</p>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <section class="card table-card" aria-labelledby="table-heading">
+          <div class="card-heading table-heading">
+            <div>
+              <p class="section-kicker">04 / 对齐明细</p>
+              <h2 id="table-heading">当前筛选结果</h2>
+              <p id="table-summary" class="table-summary">—</p>
+            </div>
+            <div class="export-actions">
+              <button id="export-raw" class="button ghost" type="button">原始样例 CSV</button>
+              <button id="export-csv" class="button ghost" type="button">校准结果 CSV</button>
+              <button id="export-png" class="button dark" type="button">
+                <span class="download-icon" aria-hidden="true">↓</span>
+                导出前后对比图
+              </button>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>传感器</th>
+                  <th class="num">参考值</th>
+                  <th class="num">原始值</th>
+                  <th class="num">校准值</th>
+                  <th class="num">原始误差</th>
+                  <th class="num">校准误差</th>
+                  <th>清洗</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody id="table-body"></tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            <span>数值显示精度与 CSV / PNG 导出保持一致</span>
+            <span id="table-row-count">—</span>
+          </div>
+        </section>
+
+        <footer class="page-footer">
+          <span>TRIDENT CALIBRATION LAB · 2026</span>
+          <span>屏幕、列表与导出共用同一派生模型 / 无预设指标</span>
+        </footer>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
