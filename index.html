@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>逐小时站点潮位分析台</title>
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>逐小时站点潮位分析台</h1>
+    <div id="meta-bar" class="meta-bar"></div>
+  </header>
+
+  <section class="controls" aria-label="筛选与视图控制">
+    <div class="control-group">
+      <span class="control-label">数据集</span>
+      <select id="dataset-select"></select>
+    </div>
+    <div class="control-group">
+      <span class="control-label">视图</span>
+      <div id="view-switch" class="segmented" role="group">
+        <button type="button" data-view="heatmap">热图</button>
+        <button type="button" data-view="line">折线</button>
+        <button type="button" data-view="profile">剖面</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <span class="control-label">时间窗口</span>
+      <select id="window-select"></select>
+    </div>
+    <div class="control-group">
+      <span class="control-label">焦点站点</span>
+      <select id="focus-select"></select>
+    </div>
+    <div class="control-group">
+      <span class="control-label">站点筛选</span>
+      <div id="station-filter" class="station-chips"></div>
+    </div>
+    <div class="control-group">
+      <button type="button" id="export-png">导出 PNG</button>
+      <button type="button" id="run-selftest" class="secondary">运行页面自检</button>
+    </div>
+  </section>
+
+  <section id="filter-summary" class="filter-summary" aria-live="polite"></section>
+
+  <main class="chart-area">
+    <div class="canvas-wrap">
+      <canvas id="tide-canvas"></canvas>
+      <div id="tooltip" class="tooltip" hidden></div>
+    </div>
+    <div id="selftest-out" class="selftest" hidden></div>
+  </main>
+
+  <section class="data-section">
+    <h2>数据质量摘要 <small>（全量 8 站 × 168 小时，按原始记录重算）</small></h2>
+    <div id="quality-summary" class="quality-cards"></div>
+  </section>
+
+  <section class="data-section">
+    <h2>窗口内站点统计 <small>（清洗去重值口径）</small></h2>
+    <div class="table-wrap">
+      <table id="station-table">
+        <thead>
+          <tr>
+            <th>站点</th><th>有效点数</th><th>缺失</th>
+            <th>均值 (m)</th><th>最高 (m)</th><th>最低 (m)</th><th>完整率 (%)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="data-section">
+    <h2>焦点站点清洗后逐时列表 <small>（仅当前窗口；与图形同源重算）</small></h2>
+    <div class="table-wrap scroll">
+      <table id="detail-table">
+        <thead>
+          <tr><th>时间</th><th>站点</th><th>潮高 (m)</th><th>状态</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="app-footer">
+    <p>统计口径：物理有效区间 [-5, 8] m；同站点整点重复记录取算术平均；区间外记录记为异常并剔除；
+      无有效记录的整点槽位记为缺失。所有派生数值均由原始合成样例实时重算。</p>
+  </footer>
+
+  <script src="src/tide-core.js"></script>
+  <script src="src/tide-chart.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>

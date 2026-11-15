@@ -1,0 +1,17 @@
+{
+  "name": "hourly-tide-heatmap",
+  "version": "1.0.0",
+  "private": true,
+  "description": "逐小时站点潮位热图/折线/剖面分析台（Canvas + 确定性合成数据）",
+  "scripts": {
+    "test": "node test/tide-core.test.js",
+    "test:ui": "node test/ui.test.js",
+    "test:browser": "node test/browser.smoke.js",
+    "screenshots": "node test/capture-views.js"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "jsdom": "^31.0.1",
+    "puppeteer": "^25.17.0"
+  }
+}
