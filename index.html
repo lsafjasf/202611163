@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>双人协作窄小装配台</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #0a0d13;
+      color: #e8edf7;
+      font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 14px;
+    }
+    h1 { font-size: 18px; margin: 4px 0; font-weight: 700; }
+    canvas {
+      background: #10141d;
+      border: 1px solid #2a3346;
+      border-radius: 14px;
+      max-width: 100%;
+    }
+    .help {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #8b97ad;
+      max-width: 980px;
+    }
+    .help b { color: #e8edf7; }
+    kbd {
+      background: #1b2230;
+      border: 1px solid #2a3346;
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-family: inherit;
+      color: #4cc9f0;
+    }
+    #status { font-size: 13px; color: #3ddc97; min-height: 18px; }
+  </style>
+</head>
+<body>
+  <h1>双人协作 · 窄小装配台</h1>
+  <div id="status">加载中…</div>
+  <canvas id="game" width="980" height="600"></canvas>
+  <div class="help">
+    <div>
+      <b>玩家 1（默认左·夹具）</b><br />
+      <kbd>W</kbd>/<kbd>S</kbd> 加压/泄压；换边后用
+      <kbd>F</kbd>/<kbd>G</kbd> 移动、<kbd>V</kbd> 压装
+    </div>
+    <div>
+      <b>玩家 2（默认右·模块）</b><br />
+      <kbd>←</kbd>/<kbd>→</kbd> 移动、<kbd>Enter</kbd> 压装；换边后用
+      <kbd>↑</kbd>/<kbd>↓</kbd> 控夹具
+    </div>
+    <div>
+      <b>系统</b><br />
+      <kbd>P</kbd>/<kbd>Esc</kbd> 暂停 ·
+      <kbd>R</kbd> 重开 · <kbd>Tab</kbd> 换边 ·
+      <kbd>D</kbd> 单人调试 · <kbd>L</kbd> 回放
+    </div>
+  </div>
+  <script type="module" src="./src/web/main.js"></script>
+</body>
+</html>
