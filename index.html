@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>双人协作摄影机</title>
+<style>
+  body { margin:0; background:#111; color:#ddd; font-family:system-ui,sans-serif;
+         display:flex; flex-direction:column; align-items:center; }
+  h1 { font-size:18px; margin:10px 0 4px; }
+  #bar { display:flex; gap:8px; margin:6px 0; align-items:center; flex-wrap:wrap; justify-content:center; }
+  button { background:#2a2a2a; color:#ddd; border:1px solid #555; border-radius:4px;
+           padding:5px 12px; cursor:pointer; font-size:13px; }
+  button:hover { background:#3a3a3a; }
+  button.active { background:#0a5; color:#fff; }
+  #status { font-weight:bold; min-width:220px; text-align:center; }
+  #main { display:flex; gap:12px; align-items:flex-start; }
+  .panel { width:190px; background:#1b1b1b; border:1px solid #333; border-radius:6px;
+           padding:8px 10px; font-size:13px; }
+  .panel h2 { font-size:14px; margin:2px 0 6px; }
+  .meter { margin:6px 0; }
+  .meter label { display:block; margin-bottom:2px; color:#aaa; }
+  .track { height:10px; background:#333; border-radius:5px; position:relative; overflow:hidden; }
+  .fill { position:absolute; top:0; bottom:0; background:#4af; }
+  .fill.ok { background:#4c4; }
+  .fill.bad { background:#c44; }
+  canvas { background:#000; border:1px solid #444; border-radius:4px; }
+  #shared { display:flex; gap:16px; margin:6px 0; font-size:14px; }
+  #shared b { color:#ffd54a; }
+  #replayBox { margin:8px 0; font-size:12px; color:#aaa; display:flex; gap:8px; align-items:center; }
+  #events { max-height:120px; overflow-y:auto; font-size:12px; }
+  #events .conflict { color:#ff6b6b; }
+  #events .ok { color:#7ee787; }
+  kbd { background:#333; border-radius:3px; padding:0 4px; font-size:12px; }
+</style>
+</head>
+<body>
+<h1>双人协作摄影机</h1>
+<div id="bar">
+  <span id="status">进行中</span>
+  <button id="btnPause">暂停 (P)</button>
+  <button id="btnRestart">重开 (R)</button>
+  <button id="btnSwap">轮换控制侧 (T)</button>
+  <button id="btnDebug">单人调试 (G)</button>
+  <button id="btnReplay">回放上一局</button>
+</div>
+<div id="shared">
+  <span>胶片 <b id="film">6</b></span>
+  <span>照片 <b id="score">0</b>/3</span>
+  <span>倒计时 <b id="clock">120.0</b>s</span>
+</div>
+<div id="main">
+  <div class="panel" id="panelLeft">
+    <h2>左玩家 · <span id="roleL">云台</span></h2>
+    <div class="meter"><label>构图</label><div class="track"><div class="fill" id="mComp"></div></div></div>
+    <div class="meter"><label>对焦</label><div class="track"><div class="fill" id="mFocusL"></div></div></div>
+    <div class="meter"><label>曝光</label><div class="track"><div class="fill" id="mExpoL"></div></div></div>
+    <p id="keysL"></p>
+  </div>
+  <canvas id="view" width="720" height="432"></canvas>
+  <div class="panel" id="panelRight">
+    <h2>右玩家 · <span id="roleR">对焦+曝光</span></h2>
+    <div class="meter"><label>对焦距离</label><div class="track"><div class="fill" id="mFocusR"></div></div></div>
+    <div class="meter"><label>曝光补偿</label><div class="track"><div class="fill" id="mExpoR"></div></div></div>
+    <p id="keysR"></p>
+    <div id="events"></div>
+  </div>
+</div>
+<div id="replayBox" style="display:none">
+  回放 <input type="range" id="scrub" min="0" max="0" value="0" style="width:360px">
+  <span id="replayTime"></span>
+</div>
+<script src="engine.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
