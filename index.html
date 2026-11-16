@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>可平铺纹理生成器</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>可平铺纹理生成器</h1>
+    <div class="topbar-actions">
+      <button id="btn-undo" title="撤销 (Ctrl+Z)">↩ 撤销</button>
+      <button id="btn-redo" title="重做 (Ctrl+Y)">↪ 重做</button>
+      <button id="btn-save" title="保存到浏览器">💾 保存</button>
+      <button id="btn-reload" title="重新载入上次保存">⟳ 重新载入</button>
+      <button id="btn-export-json" title="导出工程文件">导出工程</button>
+      <label class="import-label">导入工程<input id="file-import" type="file" accept=".json" hidden /></label>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel">
+      <section>
+        <h2>纹理类型</h2>
+        <div class="seg" id="seg-type">
+          <button data-type="stone" class="active">石材</button>
+          <button data-type="wood">木纹</button>
+          <button data-type="fabric">布纹</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>参数</h2>
+        <label>尺度 <span id="v-scale"></span>
+          <input id="p-scale" type="range" min="0.25" max="8" step="0.05" />
+        </label>
+        <label>方向(°) <span id="v-angle"></span>
+          <input id="p-angle" type="range" min="0" max="180" step="1" />
+        </label>
+        <label>对比度 <span id="v-contrast"></span>
+          <input id="p-contrast" type="range" min="0.2" max="3" step="0.05" />
+        </label>
+        <label>随机种子 <span id="v-seed"></span>
+          <input id="p-seed" type="range" min="1" max="999" step="1" />
+        </label>
+      </section>
+
+      <section>
+        <h2>预览</h2>
+        <div class="seg" id="seg-view">
+          <button data-view="flat" class="active">平面平铺</button>
+          <button data-view="model">模型</button>
+        </div>
+        <div class="seg" id="seg-model" hidden>
+          <button data-model="sphere" class="active">球体</button>
+          <button data-model="cube">立方体</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>局部修补</h2>
+        <label>笔刷大小 <span id="v-brush"></span>
+          <input id="p-brush" type="range" min="4" max="64" step="1" />
+        </label>
+        <p class="hint">在平面预览上涂抹，靠近边缘的修补会同步到对侧，保证四边接缝连续。</p>
+      </section>
+
+      <section>
+        <h2>文字 / 图形</h2>
+        <div class="seg">
+          <button id="btn-add-text">+ 文字</button>
+          <button id="btn-add-rect">+ 矩形</button>
+          <button id="btn-add-ellipse">+ 椭圆</button>
+        </div>
+        <div id="element-props" hidden>
+          <label>内容 <input id="el-text" type="text" /></label>
+          <label>字号 <input id="el-fontsize" type="number" min="4" max="512" /></label>
+          <label>字体
+            <select id="el-font">
+              <option value="sans-serif">Sans</option>
+              <option value="serif">Serif</option>
+              <option value="monospace">Mono</option>
+            </select>
+          </label>
+          <label>颜色 <input id="el-color" type="color" /></label>
+          <label>X <input id="el-x" type="number" /></label>
+          <label>Y <input id="el-y" type="number" /></label>
+          <label>宽 <input id="el-w" type="number" /></label>
+          <label>高 <input id="el-h" type="number" /></label>
+          <button id="btn-del-el">删除元素</button>
+        </div>
+        <p class="hint">点击预览中的元素可选中并拖动；红框为安全边距。</p>
+      </section>
+
+      <section>
+        <h2>导出</h2>
+        <div class="seg">
+          <button id="btn-png512">PNG 512</button>
+          <button id="btn-png1024">PNG 1024</button>
+          <button id="btn-svg">SVG</button>
+        </div>
+        <p class="hint">导出前自动检查安全边距与文字裁切，参数随工程一并保留。</p>
+      </section>
+
+      <section>
+        <h2>案例</h2>
+        <div class="seg">
+          <button id="btn-tpl-default">默认案例</button>
+          <button id="btn-tpl-boundary">边界案例</button>
+        </div>
+        <label>关键帧时间 <span id="v-time"></span>
+          <input id="p-time" type="range" min="0" max="1" step="0.01" value="0" />
+        </label>
+      </section>
+    </aside>
+
+    <section class="stage">
+      <div class="canvas-wrap">
+        <canvas id="stage" width="768" height="768"></canvas>
+      </div>
+      <div id="statusbar">
+        <span id="status">就绪</span>
+        <span id="save-state"></span>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" hidden></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
