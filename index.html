@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>海报网格编辑器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="toolbar">
+    <span class="brand">海报网格编辑器</span>
+    <label>栏数
+      <select id="colsSelect">
+        <option value="3">三栏</option>
+        <option value="4">四栏</option>
+      </select>
+    </label>
+    <button id="addText">+ 文本</button>
+    <button id="addImage">+ 图片</button>
+    <button id="addShape">+ 图形</button>
+    <span class="sep"></span>
+    <button id="undoBtn" title="Ctrl+Z">撤销</button>
+    <button id="redoBtn" title="Ctrl+Y">重做</button>
+    <span class="sep"></span>
+    <button id="saveBtn">保存</button>
+    <button id="loadBtn">重新载入</button>
+    <button id="exportJsonBtn">导出 JSON</button>
+    <button id="importJsonBtn">导入 JSON</button>
+    <span class="sep"></span>
+    <button id="exportPngBtn" class="primary">导出 PNG</button>
+    <button id="exportSvgBtn" class="primary">导出 SVG</button>
+    <span class="sep"></span>
+    <button id="presetDefault">默认案例</button>
+    <button id="presetBoundary">边界案例</button>
+    <button id="playBtn" title="播放关键帧动画">▶ 预览动画</button>
+  </header>
+  <div id="alerts" hidden></div>
+  <main>
+    <div id="canvasWrap">
+      <canvas id="stage" width="900" height="1200"></canvas>
+      <textarea id="textEditor" hidden></textarea>
+    </div>
+    <aside id="panel">
+      <h3>属性</h3>
+      <div id="panelEmpty">未选中元素。单击选择,拖动移动(自动吸附参考线),拖右下角手柄缩放,双击文本编辑。</div>
+      <div id="panelBody" hidden>
+        <label>类型 <input id="pType" disabled></label>
+        <label>X <input id="pX" type="number"></label>
+        <label>Y <input id="pY" type="number"></label>
+        <label>宽 <input id="pW" type="number" min="1"></label>
+        <label>高 <input id="pH" type="number" min="1"></label>
+        <label>不透明度 <input id="pOpacity" type="range" min="0" max="1" step="0.05"></label>
+        <div id="textProps">
+          <label>文字 <textarea id="pText" rows="3"></textarea></label>
+          <label>字体
+            <select id="pFont">
+              <option value="sans-serif">sans-serif</option>
+              <option value="serif">serif</option>
+              <option value="monospace">monospace</option>
+              <option value="'PingFang SC', sans-serif">PingFang SC</option>
+              <option value="'Microsoft YaHei', sans-serif">Microsoft YaHei</option>
+              <option value="Georgia, serif">Georgia</option>
+            </select>
+          </label>
+          <label>字号 <input id="pFontSize" type="number" min="8" max="200"></label>
+          <label>颜色 <input id="pColor" type="color"></label>
+          <label>对齐
+            <select id="pAlign">
+              <option value="left">左对齐</option>
+              <option value="center">居中</option>
+              <option value="right">右对齐</option>
+            </select>
+          </label>
+          <label><input id="pBold" type="checkbox"> 加粗</label>
+        </div>
+        <div id="shapeProps">
+          <label>填充 <input id="pFill" type="color"></label>
+          <label>形状
+            <select id="pShape">
+              <option value="rect">矩形</option>
+              <option value="ellipse">椭圆</option>
+            </select>
+          </label>
+        </div>
+        <div id="imageProps">
+          <button id="uploadImgBtn">上传图片替换</button>
+        </div>
+        <h4>关键帧</h4>
+        <div id="kfList"></div>
+        <button id="addKfBtn">在当前状态添加关键帧</button>
+        <button id="deleteBtn" class="danger">删除元素</button>
+      </div>
+    </aside>
+  </main>
+  <input type="file" id="fileInput" hidden accept="image/*">
+  <input type="file" id="jsonInput" hidden accept="application/json">
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
