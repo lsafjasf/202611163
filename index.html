@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>二维码海报编辑器</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="toolbar">
+    <span class="brand">二维码海报编辑器</span>
+    <div class="group">
+      <button id="btnAddText" title="添加文字">+ 文字</button>
+      <button id="btnAddRect" title="添加矩形">+ 矩形</button>
+      <button id="btnAddEllipse" title="添加椭圆">+ 椭圆</button>
+      <button id="btnAddImage" title="添加图片">+ 图片</button>
+      <button id="btnAddQR" title="添加二维码">+ 二维码</button>
+    </div>
+    <div class="group">
+      <button id="btnUndo" title="撤销 (Ctrl+Z)">↶ 撤销</button>
+      <button id="btnRedo" title="重做 (Ctrl+Y)">↷ 重做</button>
+    </div>
+    <div class="group">
+      <button id="btnDefault" title="载入默认案例">默认案例</button>
+      <button id="btnEdge" title="载入边界案例">边界案例</button>
+    </div>
+    <div class="group">
+      <button id="btnSave" title="保存工程为 JSON">保存</button>
+      <button id="btnLoad" title="载入工程 JSON">载入</button>
+      <input type="file" id="fileLoad" accept=".json,application/json" hidden>
+      <input type="file" id="fileImage" accept="image/*" hidden>
+      <input type="file" id="fileFont" accept=".woff,.woff2,.ttf,.otf" hidden>
+    </div>
+    <div class="group">
+      <select id="exportScale" title="导出倍率">
+        <option value="1">1x</option>
+        <option value="2" selected>2x</option>
+        <option value="3">3x</option>
+      </select>
+      <button id="btnExportPng" title="导出 PNG">导出 PNG</button>
+      <button id="btnExportSvg" title="导出 SVG（可编辑矢量）">导出 SVG</button>
+    </div>
+    <div class="group">
+      <button id="btnPlay" title="播放关键帧动画">▶ 播放</button>
+    </div>
+  </header>
+
+  <main>
+    <aside id="left">
+      <section class="panel">
+        <h3>画布与背景</h3>
+        <div id="canvasProps"></div>
+      </section>
+      <section class="panel">
+        <h3>图层</h3>
+        <ul id="layerList"></ul>
+        <div class="row">
+          <button id="btnLayerUp">上移</button>
+          <button id="btnLayerDown">下移</button>
+          <button id="btnDelete">删除</button>
+        </div>
+      </section>
+      <section class="panel">
+        <h3>实时检查 <span id="issueCount"></span></h3>
+        <ul id="issueList"></ul>
+      </section>
+    </aside>
+
+    <section id="stage">
+      <canvas id="poster"></canvas>
+    </section>
+
+    <aside id="right">
+      <section class="panel">
+        <h3>属性</h3>
+        <div id="props"><p class="hint">点击画布中的元素进行编辑</p></div>
+      </section>
+      <section class="panel" id="animPanel" hidden>
+        <h3>关键帧动画</h3>
+        <div id="animProps"></div>
+      </section>
+    </aside>
+  </main>
+
+  <div id="modal" hidden>
+    <div class="dialog">
+      <h3 id="modalTitle"></h3>
+      <div id="modalBody"></div>
+      <div class="row right">
+        <button id="modalCancel">返回修复</button>
+        <button id="modalOk" class="danger">仍然导出</button>
+      </div>
+    </div>
+  </div>
+  <div id="toast" hidden></div>
+
+  <script src="js/qr.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/validate.js"></script>
+  <script src="js/svg.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

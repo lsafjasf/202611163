@@ -1,0 +1,30 @@
+{
+  "name": "qr-poster-studio",
+  "version": "1.0.0",
+  "description": "二维码活动海报编辑器：Canvas 预览、可编辑 SVG/PNG 导出、JSON 工程",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node test/qr.test.js && node test/model.test.js && node test/validate.test.js && node test/render.test.js && node test/svg.test.js && node test/app.test.js",
+    "start": "python3 -m http.server 8080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/202611163.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/202611163/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/202611163#readme",
+  "devDependencies": {
+    "jsdom": "^31.0.1",
+    "jsqr": "^1.4.0",
+    "qrcode": "^1.5.4"
+  }
+}
