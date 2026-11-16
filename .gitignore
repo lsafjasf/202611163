@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+*.log
+
+# Browser smoke-test and screenshot output
+artifacts/*.png
+artifacts/*.svg
+playwright-report/
+test-results/
