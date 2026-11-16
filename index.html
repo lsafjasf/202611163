@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>固定时间步物理演示</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+         background: #14171c; color: #dfe6ee; }
+  header { display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+           background: #1c2129; border-bottom: 1px solid #2c333d; flex-wrap: wrap; }
+  header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  .badge { padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #2c333d; }
+  .badge.mode-fixed { background: #14532d; color: #bbf7d0; }
+  .badge.mode-variable { background: #7f1d1d; color: #fecaca; }
+  .badge.paused { background: #713f12; color: #fde68a; }
+  main { display: flex; gap: 14px; padding: 14px 16px; flex-wrap: wrap; }
+  .stage { position: relative; }
+  canvas { background: #0d1015; border: 1px solid #2c333d; border-radius: 6px;
+           display: block; max-width: 100%; }
+  .legend { font-size: 12px; margin-top: 6px; color: #9aa7b4; }
+  .legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px;
+                margin: 0 4px 0 10px; vertical-align: -1px; }
+  .panel { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 10px; }
+  fieldset { border: 1px solid #2c333d; border-radius: 6px; margin: 0; padding: 10px 12px; }
+  legend { font-size: 12px; color: #9aa7b4; padding: 0 6px; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  button, select { background: #242b35; color: #dfe6ee; border: 1px solid #3a4350;
+                   border-radius: 5px; padding: 5px 12px; font-size: 13px; cursor: pointer; }
+  button:hover, select:hover { background: #2e3743; }
+  table.metrics { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  table.metrics td { padding: 3px 6px; border-bottom: 1px solid #232a33; }
+  table.metrics td:first-child { color: #9aa7b4; white-space: nowrap; }
+  .logs { font-size: 12px; max-height: 130px; overflow-y: auto; display: flex;
+          flex-direction: column; gap: 3px; }
+  .logs .err { color: #fca5a5; }
+  .logs .hint { color: #86efac; }
+  .empty { color: #5b6672; }
+  #degraded { color: #fbbf24; font-size: 12px; min-height: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>固定时间步 + 插值渲染 物理演示</h1>
+  <span id="badgeMode" class="badge mode-fixed">模式: 固定步长</span>
+  <span id="badgeState" class="badge">运行中</span>
+  <span id="badgeSpeed" class="badge">1.0x</span>
+  <span id="badgeScenario" class="badge">正常输入</span>
+</header>
+<main>
+  <div class="stage">
+    <canvas id="view" width="800" height="450"></canvas>
+    <div class="legend">
+      轨迹对比（同一输入轨迹，不同帧率时钟）:
+      <span class="sw" style="background:#22d3ee"></span>参考 60Hz
+      <span class="sw" style="background:#fb923c"></span>当前屏幕刷新率
+      <span id="degraded"></span>
+    </div>
+  </div>
+  <div class="panel">
+    <fieldset>
+      <legend>控制</legend>
+      <div class="controls">
+        <select id="selScenario">
+          <option value="normal">正常输入</option>
+          <option value="boundary">边界输入</option>
+          <option value="corrupted">损坏输入</option>
+        </select>
+        <select id="selMode">
+          <option value="fixed">修复后: 固定步长+插值</option>
+          <option value="variable">修复前: 可变步长</option>
+        </select>
+        <select id="selSpeed">
+          <option value="0.5">0.5x</option>
+          <option value="1" selected>1.0x</option>
+          <option value="2">2.0x</option>
+          <option value="4">4.0x</option>
+        </select>
+        <button id="btnPause">暂停</button>
+        <button id="btnRestart">重启</button>
+        <button id="btnBlur">模拟失焦 2s</button>
+        <button id="btnExport">导出日志</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>可观测指标</legend>
+      <table class="metrics" id="metrics"></table>
+    </fieldset>
+    <fieldset>
+      <legend>异常日志与恢复建议</legend>
+      <div class="logs" id="logs"><span class="empty">暂无异常</span></div>
+    </fieldset>
+  </div>
+</main>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

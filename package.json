@@ -1,0 +1,10 @@
+{
+  "name": "fixed-step-physics-demo",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Fixed-timestep physics scene with interpolated rendering, input-trajectory comparison and observability",
+  "scripts": {
+    "test": "node test/headless.js"
+  }
+}
