@@ -1,0 +1,116 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #10151d;
+  color: #dfe6ef;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 8px 16px;
+  background: #18202c;
+  border-bottom: 1px solid #2a3648;
+  flex-wrap: wrap;
+}
+header h1 { font-size: 18px; margin: 0; }
+#topbar { display: flex; gap: 16px; font-size: 14px; }
+#topbar span { background: #222d3d; padding: 3px 10px; border-radius: 4px; }
+#buttons { display: flex; gap: 8px; margin-left: auto; }
+button {
+  background: #2b3a4f;
+  color: #dfe6ef;
+  border: 1px solid #3d5170;
+  border-radius: 4px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+button:hover { background: #36496a; }
+button.active { background: #4a6ea9; border-color: #6d94d6; }
+
+main {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  align-items: flex-start;
+  justify-content: center;
+}
+.panel {
+  width: 220px;
+  background: #18202c;
+  border: 1px solid #2a3648;
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+.panel h2 { font-size: 15px; margin: 4px 0 10px; color: #9fc1ec; }
+.gauge { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 13px; }
+.gauge label { width: 60px; flex-shrink: 0; color: #9aa8ba; }
+.gauge meter { flex: 1; height: 12px; }
+.gauge span { width: 44px; text-align: right; font-variant-numeric: tabular-nums; }
+.keys { font-size: 12px; color: #7c8ba0; border-top: 1px dashed #2a3648; padding-top: 8px; }
+
+#center { display: flex; flex-direction: column; gap: 8px; }
+canvas { background: #0b1018; border: 1px solid #2a3648; border-radius: 6px; }
+#shared {
+  display: flex;
+  gap: 18px;
+  background: #18202c;
+  border: 1px solid #2a3648;
+  border-radius: 6px;
+  padding: 8px 14px;
+}
+#shared .gauge { flex: 1; }
+#message {
+  min-height: 26px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+}
+#message.ok { color: #6fd68a; }
+#message.bad { color: #ef6d6d; }
+#message.warn { color: #e8c15a; }
+#eventLog {
+  height: 90px;
+  overflow-y: auto;
+  font-size: 12px;
+  background: #141b26;
+  border: 1px solid #2a3648;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+#eventLog .conflict { color: #ef6d6d; }
+#eventLog .recover { color: #6fd68a; }
+#eventLog .info { color: #9aa8ba; }
+
+#replayOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 12, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+#replayOverlay.hidden { display: none; }
+#replayBox {
+  background: #18202c;
+  border: 1px solid #3d5170;
+  border-radius: 8px;
+  padding: 16px;
+}
+#replayBox h2 { margin: 0 0 10px; font-size: 16px; }
+#replayScrub { width: 100%; margin: 8px 0; }
+#replayControls { display: flex; gap: 10px; margin-bottom: 8px; }
+#replayTimeline { position: relative; height: 26px; background: #10151d; border-radius: 4px; }
+#replayTimeline .marker {
+  position: absolute;
+  top: 2px;
+  width: 4px;
+  height: 22px;
+  background: #ef6d6d;
+  border-radius: 2px;
+  cursor: pointer;
+}
+#replayTimeline .marker.recover { background: #6fd68a; }

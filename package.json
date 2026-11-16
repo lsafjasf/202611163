@@ -1,0 +1,10 @@
+{
+  "name": "bridge-repair-coop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "双人协作吊桥维修 Canvas 游戏",
+  "scripts": {
+    "test": "node test/simulate.js && node test/smoke.js",
+    "start": "python3 -m http.server 8000"
+  }
+}

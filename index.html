@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吊桥协同维修 · Bridge Repair Co-op</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>吊桥协同维修</h1>
+  <div id="topbar">
+    <span id="phaseLabel">阶段: 就位</span>
+    <span id="countdown">倒计时 180.0s</span>
+    <span id="modeLabel">模式: 双人</span>
+  </div>
+  <div id="buttons">
+    <button id="btnPause">暂停 (P)</button>
+    <button id="btnRestart">重开 (R)</button>
+    <button id="btnDebug">单人调试 (T)</button>
+    <button id="btnSwap">轮换控制侧 (X)</button>
+    <button id="btnReplay">查看回放</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel" id="panelLeft">
+    <h2 id="leftTitle">玩家 A · 左侧平台</h2>
+    <div class="gauge"><label>绳索张力</label><meter id="tensionL" min="0" max="100" value="0"></meter><span id="tensionLVal">0</span></div>
+    <div class="gauge"><label>应力</label><meter id="stressL" min="0" max="100" value="0"></meter><span id="stressLVal">0</span></div>
+    <div class="gauge"><label>缆绳磨损</label><meter id="wearL" min="0" max="100" value="0"></meter><span id="wearLVal">0</span></div>
+    <div class="gauge"><label>平台位置</label><span id="posL">-</span></div>
+    <div class="gauge"><label>吊钩</label><span id="hookL">收起</span></div>
+    <p class="keys" id="keysLeft">移动 A/D · 收放绳 W/S</p>
+  </section>
+
+  <section id="center">
+    <canvas id="game" width="960" height="480"></canvas>
+    <div id="shared">
+      <div class="gauge"><label>桥体完整度</label><meter id="integrity" min="0" max="100" value="100"></meter><span id="integrityVal">100</span></div>
+      <div class="gauge"><label>任务进度</label><meter id="progress" min="0" max="100" value="0"></meter><span id="progressVal">0%</span></div>
+      <div class="gauge"><label>风力</label><meter id="wind" min="0" max="100" value="0"></meter><span id="windVal">0</span></div>
+    </div>
+    <div id="message"></div>
+    <div id="eventLog"></div>
+  </section>
+
+  <section class="panel" id="panelRight">
+    <h2 id="rightTitle">玩家 B · 右侧平台</h2>
+    <div class="gauge"><label>绳索张力</label><meter id="tensionR" min="0" max="100" value="0"></meter><span id="tensionRVal">0</span></div>
+    <div class="gauge"><label>应力</label><meter id="stressR" min="0" max="100" value="0"></meter><span id="stressRVal">0</span></div>
+    <div class="gauge"><label>缆绳磨损</label><meter id="wearR" min="0" max="100" value="0"></meter><span id="wearRVal">0</span></div>
+    <div class="gauge"><label>平台位置</label><span id="posR">-</span></div>
+    <div class="gauge"><label>吊钩</label><span id="hookR">收起</span></div>
+    <p class="keys" id="keysRight">移动 ←/→ · 收放绳 ↑/↓</p>
+  </section>
+</main>
+
+<div id="replayOverlay" class="hidden">
+  <div id="replayBox">
+    <h2>回放查看器</h2>
+    <canvas id="replayCanvas" width="960" height="480"></canvas>
+    <input type="range" id="replayScrub" min="0" max="100" value="0" step="0.1">
+    <div id="replayControls">
+      <button id="replayPlay">播放</button>
+      <select id="replaySelect"></select>
+      <button id="replayClose">关闭</button>
+    </div>
+    <div id="replayTimeline"></div>
+  </div>
+</div>
+
+<script src="js/logic.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
