@@ -1,0 +1,16 @@
+{
+  "name": "stickframe-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "12-frame stick-figure stop-motion studio with shared clock, Web Audio footsteps, GIF/WebM export",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "build:samples": "node scripts/build-samples.mjs",
+    "test": "playwright test --reporter=list"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "playwright": "^1.65.1"
+  }
+}

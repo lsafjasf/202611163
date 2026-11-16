@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>火柴人定格动画工作室</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>火柴人定格动画工作室</h1>
+    <div class="group">
+      <label>帧率
+        <select id="fpsSelect">
+          <option value="8">8 fps</option>
+          <option value="12" selected>12 fps</option>
+          <option value="24">24 fps</option>
+        </select>
+      </label>
+      <label class="chk"><input type="checkbox" id="loopChk" checked /> 循环</label>
+      <button id="playBtn" type="button">▶ 播放</button>
+      <button id="pauseBtn" type="button">⏸ 暂停</button>
+      <span class="clock" id="clockLabel">00:00.00 / 帧 1</span>
+    </div>
+    <div class="group">
+      <label>场景
+        <select id="sceneSelect"></select>
+      </label>
+      <button id="addSceneBtn" type="button">＋ 新场景</button>
+    </div>
+    <div class="group">
+      <button id="saveBtn" type="button">💾 保存工程</button>
+      <button id="openBtn" type="button">📂 打开工程</button>
+      <button id="exportGifBtn" type="button">导出 GIF</button>
+      <button id="exportWebmBtn" type="button">导出 WebM</button>
+      <input type="file" id="projectFile" accept=".json,application/json" hidden />
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="stage-area">
+      <canvas id="stage" width="640" height="360"></canvas>
+      <div class="stage-hint">在画面上拖动关节点编辑当前帧姿态（头、肘、手、膝、脚等）</div>
+      <div class="transport">
+        <button id="prevFrameBtn" type="button">⏮ 上一帧</button>
+        <button id="nextFrameBtn" type="button">下一帧 ⏭</button>
+        <button id="setInBtn" type="button">设入点</button>
+        <button id="setOutBtn" type="button">设出点</button>
+        <button id="resetRangeBtn" type="button">重置入/出点</button>
+        <span id="rangeLabel">入点 0 · 出点 11 · 时长 1.00s</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <h2>当前帧</h2>
+      <div class="row">
+        <label>脚步声
+          <select id="stepSelect">
+            <option value="none">无</option>
+            <option value="left">左脚</option>
+            <option value="right">右脚</option>
+            <option value="both">双脚</option>
+          </select>
+        </label>
+      </div>
+      <h2>字幕</h2>
+      <div class="row">
+        <textarea id="subtitleText" rows="2" placeholder="为本帧区间输入字幕文字"></textarea>
+      </div>
+      <div class="row">
+        <button id="applySubtitleBtn" type="button">将字幕应用到当前帧</button>
+      </div>
+      <div id="subtitleList" class="subtitle-list"></div>
+      <h2>音频</h2>
+      <div class="row">
+        <label>音频起始帧 <input type="number" id="audioStart" min="0" max="11" value="0" /></label>
+      </div>
+      <h2>转场</h2>
+      <div class="row">
+        <label>淡入帧数 <input type="number" id="fadeIn" min="0" max="6" value="2" /></label>
+        <label>淡出帧数 <input type="number" id="fadeOut" min="0" max="6" value="2" /></label>
+      </div>
+      <div id="statusLog" class="status-log"></div>
+    </aside>
+  </main>
+
+  <footer class="timeline">
+    <div class="timeline-tools">
+      <button id="addFrameBtn" type="button">＋ 新增帧</button>
+      <button id="duplicateBtn" type="button">⧉ 复制上一帧</button>
+      <button id="deleteFrameBtn" type="button">🗑 删除帧</button>
+      <span class="hint">每场景最多 12 帧 · 点击缩略图跳转 · 拖动缩略图区域可逐帧擦洗</span>
+    </div>
+    <canvas id="strip" width="1080" height="120"></canvas>
+  </footer>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
